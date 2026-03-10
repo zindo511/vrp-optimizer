@@ -1,7 +1,7 @@
 CREATE TABLE orders (
     id               BIGSERIAL PRIMARY KEY,
     customer_name    VARCHAR(255) NOT NULL,
-    customer_phone   VARCHAR(20),
+    customer_phone   VARCHAR(20) NOT NULL,
     location_id      BIGINT NOT NULL REFERENCES locations(id),
     total_weight_kg  DECIMAL(10,2) NOT NULL,
     total_volume_m3  DECIMAL(10,2),
