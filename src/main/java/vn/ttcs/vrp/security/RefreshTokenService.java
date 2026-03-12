@@ -37,23 +37,23 @@ public class RefreshTokenService { // 4 hàm, tìm/tạo/kiểm tra/xoá
         refreshToken.setToken(UUID.randomUUID().toString());
 
         LocalDateTime expiryDate = LocalDateTime.now().plusNanos(jwtProperties.getJwtRefreshExpirationMs() * 1_000_000);
+        refreshToken.setExpiryDate(expiryDate);
         return refreshTokenRepository.save(refreshToken);
     }
 
     // verify refresh token xem nó hết hạn chưa
-    public RefreshToken verifyExpiration(RefreshToken refreshToken) {
+    public boolean verifyExpiration(RefreshToken refreshToken) {
         if (refreshToken.getExpiryDate().isBefore(LocalDateTime.now())) {
             refreshTokenRepository.delete(refreshToken);
             throw new RuntimeException("Refresh token expired");
         }
-        return refreshToken;
+        return true;
     }
 
     // đăng xuất - logout khỏi thiết bị
     @Transactional
     public int deleteByUserId(Long userId) {
         User user = userRepository.findById(userId).orElse(null);
-
         return refreshTokenRepository.deleteByUser(user);
     }
 }
