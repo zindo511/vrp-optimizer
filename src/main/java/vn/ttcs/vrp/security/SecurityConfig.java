@@ -41,6 +41,7 @@ public class SecurityConfig {
     }
 
     // 3, két sắt (dùng để gọi login)
+    @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) {
         return authConfig.getAuthenticationManager();
     }

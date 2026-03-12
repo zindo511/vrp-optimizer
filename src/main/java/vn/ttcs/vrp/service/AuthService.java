@@ -12,7 +12,7 @@ public interface AuthService {
 
     AuthResponse login(LogInRequest request);
 
-    void logout();
+    boolean logout();
 
     AuthResponse refreshToken(RefreshTokenRequest request);
 }

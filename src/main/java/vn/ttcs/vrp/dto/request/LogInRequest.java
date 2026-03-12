@@ -15,7 +15,4 @@ public class LogInRequest {
 
     @NotBlank(message = "Mật khẩu không được để trống")
     private String password;
-
-    @NotBlank(message = "Mật khẩu xác nhận không được để trống")
-    private String confirmPassword;
 }
