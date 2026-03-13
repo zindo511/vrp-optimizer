@@ -54,6 +54,7 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/refresh-token")
     public ResponseEntity<ApiResponse<AuthResponse>> refreshToken(
             @Valid @RequestBody RefreshTokenRequest request
     ){
