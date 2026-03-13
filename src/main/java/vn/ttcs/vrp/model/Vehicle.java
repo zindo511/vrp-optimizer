@@ -2,6 +2,7 @@ package vn.ttcs.vrp.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import vn.ttcs.vrp.enums.VehicleStatus;
 
 @Entity
 @Table(name = "vehicles")
@@ -19,7 +20,9 @@ public class Vehicle extends BaseEntity {
     @Column(name = "license_plate", length = 50, nullable = false, unique = true)
     private String licensePlate;
 
+    @Enumerated(EnumType.STRING)
     @Column(length = 50)
-    private String status = "AVAILABLE";
+    @Builder.Default
+    private VehicleStatus status = VehicleStatus.AVAILABLE;
 
 }

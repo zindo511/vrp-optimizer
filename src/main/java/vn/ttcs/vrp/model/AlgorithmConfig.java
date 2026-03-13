@@ -20,20 +20,26 @@ public class AlgorithmConfig extends AuditableEntity{
     private String name;
 
     @Column(name = "population_size")
+    @Builder.Default
     private Integer populationSize = 100;
 
+    @Builder.Default
     private Integer generations = 500;
 
     @Column(name = "mutation_rate", precision = 5, scale = 4)
+    @Builder.Default
     private BigDecimal mutationRate = BigDecimal.valueOf(0.05);
 
     @Column(name = "crossover_rate", precision = 5, scale = 4)
+    @Builder.Default
     private BigDecimal crossoverRate = BigDecimal.valueOf(0.80);
 
     @Column(name = "elitism_count")
+    @Builder.Default
     private Integer elitismCount = 2;
 
     @Column(name = "is_active")
+    @Builder.Default
     private Boolean isActive = false;
 
     @Column(columnDefinition = "TEXT")

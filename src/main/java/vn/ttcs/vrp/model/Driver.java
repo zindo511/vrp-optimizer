@@ -2,6 +2,7 @@ package vn.ttcs.vrp.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import vn.ttcs.vrp.enums.DriverStatus;
 
 @Entity
 @Table(name = "drivers")
@@ -26,6 +27,8 @@ public class Driver {
     @Column(length = 20, nullable = false)
     private String phone;
 
-    @Column(length = 50)
-    private String status = "ACTIVE";
+    @Enumerated(EnumType.STRING)
+    @Column(length = 50, nullable = false)
+    @Builder.Default
+    private DriverStatus status = DriverStatus.ACTIVE;
 }

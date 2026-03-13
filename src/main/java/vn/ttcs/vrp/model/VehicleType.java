@@ -34,11 +34,14 @@ public class VehicleType {
     private BigDecimal costPerKm;
 
     @Column(name = "fixed_cost", precision = 10, scale = 2)
+    @Builder.Default
     private BigDecimal fixedCost = BigDecimal.ZERO;
 
     @Column(name = "average_speed_kmh", precision = 5, scale = 2)
+    @Builder.Default
     private BigDecimal averageSpeedKmh = BigDecimal.valueOf(40.0);
 
     @Column(name = "is_active")
+    @Builder.Default
     private Boolean isActive = true;
 }

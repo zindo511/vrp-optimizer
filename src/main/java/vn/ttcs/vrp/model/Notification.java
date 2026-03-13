@@ -26,5 +26,6 @@ public class Notification extends BaseEntity {
     private String type;
 
     @Column(name = "is_read")
+    @Builder.Default
     private Boolean isRead = false;
 }
