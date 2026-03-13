@@ -2,6 +2,7 @@ package vn.ttcs.vrp.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import vn.ttcs.vrp.enums.RouteStopStatus;
 
 import java.time.LocalDateTime;
 
@@ -46,6 +47,8 @@ public class RouteStop {
     @Column(name = "actual_arrival")
     private LocalDateTime actualArrival;
 
-    @Column(length = 50)
-    private String status = "WAITING";
+    @Enumerated(EnumType.STRING)
+    @Column(length = 50, nullable = false)
+    @Builder.Default
+    private RouteStopStatus status = RouteStopStatus.WAITING;
 }

@@ -2,6 +2,7 @@ package vn.ttcs.vrp.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import vn.ttcs.vrp.enums.RouteStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -40,8 +41,10 @@ public class Route extends BaseEntity{
     @Column(name = "route_date", nullable = false)
     private LocalDate routeDate;
 
-    @Column(length = 50)
-    private String status = "PLANNED";
+    @Enumerated(EnumType.STRING)
+    @Column(length = 50, nullable = false)
+    @Builder.Default
+    private RouteStatus status = RouteStatus.PLANNED;
 
     @OneToMany(mappedBy = "route", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RouteStop> routeStops;

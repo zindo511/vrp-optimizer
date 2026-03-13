@@ -2,6 +2,7 @@ package vn.ttcs.vrp.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import vn.ttcs.vrp.enums.OrderStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalTime;
@@ -41,10 +42,13 @@ public class Order extends BaseEntity {
     private LocalTime timeWindowTo;
 
     @Column(name = "service_time_minutes")
+    @Builder.Default
     private Integer serviceTimeMinutes = 15;
 
-    @Column(length = 50)
-    private String status = "PENDING";
+    @Enumerated(EnumType.STRING)
+    @Column(length = 50, nullable = false)
+    @Builder.Default
+    private OrderStatus status = OrderStatus.PENDING;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by")
