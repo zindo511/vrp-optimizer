@@ -42,5 +42,26 @@ public class ApiResponse<T> {
                 .timestamp(LocalDateTime.now())
                 .build();
     }
+
+    // ---- ERROR lỗi đơn giản
+    public static  <T> ApiResponse<T> error(int code, String message, String path) {
+        return ApiResponse.<T>builder()
+                .code(code)
+                .message(message)
+                .timestamp(LocalDateTime.now())
+                .path(path)
+                .build();
+    }
+
+    // ---- ERROR lỗi kèm chi tiết bổ sung
+    public static  <T> ApiResponse<T> error(int code, String message, Object error, String path) {
+        return ApiResponse.<T>builder()
+                .code(code)
+                .message(message)
+                .timestamp(LocalDateTime.now())
+                .error(error)
+                .path(path)
+                .build();
+    }
 }
 
