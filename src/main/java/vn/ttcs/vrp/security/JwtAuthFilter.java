@@ -30,12 +30,17 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             FilterChain filterChain) throws ServletException, IOException {
 
         String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String jwt = authHeader.substring(7);
 
         try {
             String username = jwtUtils.extractUsername(jwt);
 
-            // lấy được username nhng chưa xác thực
+            // lấy được username nhưng chưa xác thực
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
