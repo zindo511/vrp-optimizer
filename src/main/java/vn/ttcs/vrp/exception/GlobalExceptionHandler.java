@@ -60,4 +60,22 @@ public class GlobalExceptionHandler {
                 401, "Email hoặc mật khẩu bị sai", request.getRequestURI()
         ));
     }
+
+    // ---- 404 Not Found - tài nguyên không được tìm thấy
+    @ExceptionHandler(ResoureNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleResoureNotFoundException(
+            ResoureNotFoundException ex, HttpServletRequest request
+    ) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error(
+                404, ex.getMessage(), request.getRequestURI()
+        ));
+    }
+
+    // ---- 500 Internal Server Error - fallback cho tất cả exception chưa được xử lý
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiResponse<Void>> handleException(Exception ex, HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiResponse.error(
+                500, "Lỗi hệ thống: " + ex.getMessage(), request.getRequestURI()
+        ));
+    }
 }
