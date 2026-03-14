@@ -12,6 +12,8 @@ import vn.ttcs.vrp.dto.request.LogInRequest;
 import vn.ttcs.vrp.dto.request.RefreshTokenRequest;
 import vn.ttcs.vrp.dto.request.RegisterRequest;
 import vn.ttcs.vrp.dto.response.AuthResponse;
+import vn.ttcs.vrp.exception.BadRequestException;
+import vn.ttcs.vrp.exception.DuplicateResourceException;
 import vn.ttcs.vrp.model.RefreshToken;
 import vn.ttcs.vrp.model.User;
 import vn.ttcs.vrp.repository.UserRepository;
@@ -38,11 +40,11 @@ public class AuthServiceImpl implements AuthService {
     public AuthResponse register(RegisterRequest request) {
 
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already exists");
+            throw new DuplicateResourceException("Email đăng ký này đã tồn tại. Vui lòng nhập email khác");
         }
 
         if (!request.getPassword().equals(request.getConfirmPassword())) {
-            throw new RuntimeException("Passwords do not match");
+            throw new BadRequestException("Mật khẩu xác nhận không đúng");
         }
 
         User user = User.builder()

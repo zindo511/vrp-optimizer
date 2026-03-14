@@ -22,6 +22,11 @@ jwt:
   jwtSecret: ${SECRET_KEY}
   jwtExpirationMs: 3600000
   jwtRefreshExpirationMs: 604800000
+logging:
+  level:
+    org:
+      springframework:
+        security=DEBUG:
 
 
 
