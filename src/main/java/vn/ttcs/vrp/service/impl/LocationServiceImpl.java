@@ -12,7 +12,7 @@ import vn.ttcs.vrp.dto.request.LocationRequest;
 import vn.ttcs.vrp.dto.request.UpdateLocationRequest;
 import vn.ttcs.vrp.dto.response.LocationResponse;
 import vn.ttcs.vrp.exception.BadRequestException;
-import vn.ttcs.vrp.exception.ResoureNotFoundException;
+import vn.ttcs.vrp.exception.ResourceNotFoundException;
 import vn.ttcs.vrp.mapper.LocationMapper;
 import vn.ttcs.vrp.model.Location;
 import vn.ttcs.vrp.repository.LocationRepository;
@@ -97,7 +97,7 @@ public class LocationServiceImpl implements LocationService {
     // ==== PRIVATE HELPER METHOD ====
     private Location findLocationById(Long locationId) {
         return locationRepository.findById(locationId)
-                .orElseThrow(() -> new ResoureNotFoundException("Location không tìm thấy"));
+                .orElseThrow(() -> new ResourceNotFoundException("Location không tìm thấy"));
     }
 
 
