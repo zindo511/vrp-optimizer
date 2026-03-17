@@ -62,9 +62,9 @@ public class GlobalExceptionHandler {
     }
 
     // ---- 404 Not Found - tài nguyên không được tìm thấy
-    @ExceptionHandler(ResoureNotFoundException.class)
+    @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleResoureNotFoundException(
-            ResoureNotFoundException ex, HttpServletRequest request
+            ResourceNotFoundException ex, HttpServletRequest request
     ) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error(
                 404, ex.getMessage(), request.getRequestURI()

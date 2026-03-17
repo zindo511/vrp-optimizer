@@ -14,7 +14,7 @@ import vn.ttcs.vrp.dto.request.RegisterRequest;
 import vn.ttcs.vrp.dto.response.AuthResponse;
 import vn.ttcs.vrp.exception.BadRequestException;
 import vn.ttcs.vrp.exception.DuplicateResourceException;
-import vn.ttcs.vrp.exception.ResoureNotFoundException;
+import vn.ttcs.vrp.exception.ResourceNotFoundException;
 import vn.ttcs.vrp.model.RefreshToken;
 import vn.ttcs.vrp.model.User;
 import vn.ttcs.vrp.repository.UserRepository;
@@ -106,7 +106,7 @@ public class AuthServiceImpl implements AuthService {
     public AuthResponse refreshToken(RefreshTokenRequest request) {
 
         RefreshToken refreshToken = refreshTokenService.findByToken(request.getRefreshToken())
-                .orElseThrow(() -> new ResoureNotFoundException("Refresh token không tìm thấy."));
+                .orElseThrow(() -> new ResourceNotFoundException("Refresh token không tìm thấy."));
 
         if (refreshToken.getExpiryDate().isBefore(LocalDateTime.now())) {
             refreshTokenService.deleteByUserId(refreshToken.getUser().getId());
