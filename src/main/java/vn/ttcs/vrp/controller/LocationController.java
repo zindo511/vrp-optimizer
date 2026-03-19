@@ -28,6 +28,7 @@ public class LocationController {
             @Valid @RequestBody LocationRequest locationRequest
     ) {
         LocationResponse response = locationService.createLocation(locationRequest);
+        log.info("Location đã được tạo: {}", response);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(
                 "Location đã được tạo thành công", response
         ));
