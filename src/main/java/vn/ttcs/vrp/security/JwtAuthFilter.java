@@ -18,7 +18,7 @@ import java.io.IOException;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class JwtAuthFilter extends OncePerRequestFilter {
+public class JwtAuthFilter extends OncePerRequestFilter { // gác cổng, kiểm tra Token
 
     private final JwtUtils jwtUtils;
     private final UserDetailsServiceImpl userDetailsService;
@@ -35,15 +35,19 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             return;
         }
 
-        String jwt = authHeader.substring(7);
-
         try {
-            String username = jwtUtils.extractUsername(jwt);
+            String jwt = authHeader.substring(7);
+            String email = jwtUtils.extractUsername(jwt);
 
-            // lấy được username nhưng chưa xác thực
-            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            // Móc hồ sơ User từ DB lên để so sánh và lấy quyền (Role)
+            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+                System.out.println("========== DEBUG SECURITY ==========");
+                System.out.println("1. Tìm thấy Email từ Token: " + email);
+                System.out.println("2. Quyền dưới Database (Authorities): " + userDetails.getAuthorities());
+                System.out.println("3. Token có hợp lệ không? " + jwtUtils.isTokenValid(jwt, userDetails));
+                System.out.println("====================================");
 
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
                 // kiểm tra token (chữ ký, đúng tên, chưa hết hạn)
                 if (jwtUtils.isTokenValid(jwt, userDetails)) {
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
