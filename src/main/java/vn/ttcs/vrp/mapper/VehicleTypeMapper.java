@@ -17,7 +17,7 @@ public interface VehicleTypeMapper {
     VehicleTypeResponse toResponse(VehicleType vehicleType);
 
     @Mapping(target = "id", ignore = true)
-    VehicleType toEntity(VehicleTypeRequest vehicleTypeRequest);
+    VehicleType toEntity(VehicleTypeRequest request);
 
     @Mapping(target = "id", ignore = true)
     void updateVehicleTypeFromRequest(UpdateVehicleTypeRequest request, @MappingTarget VehicleType vehicleType);

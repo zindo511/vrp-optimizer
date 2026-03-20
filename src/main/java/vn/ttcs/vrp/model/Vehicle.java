@@ -2,6 +2,7 @@ package vn.ttcs.vrp.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import vn.ttcs.vrp.enums.VehicleStatus;
 
 @Entity
