@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import vn.ttcs.vrp.dto.Coordinate;
 import vn.ttcs.vrp.dto.request.LocationRequest;
 import vn.ttcs.vrp.dto.request.UpdateLocationRequest;
 import vn.ttcs.vrp.dto.response.LocationResponse;
@@ -16,7 +17,10 @@ import vn.ttcs.vrp.exception.ResourceNotFoundException;
 import vn.ttcs.vrp.mapper.LocationMapper;
 import vn.ttcs.vrp.model.Location;
 import vn.ttcs.vrp.repository.LocationRepository;
+import vn.ttcs.vrp.service.GeocodingService;
 import vn.ttcs.vrp.service.LocationService;
+
+import java.math.BigDecimal;
 
 @Service
 @RequiredArgsConstructor
@@ -25,14 +29,23 @@ public class LocationServiceImpl implements LocationService {
 
     private final LocationRepository locationRepository;
     private final LocationMapper locationMapper;
+    private final GeocodingService geocodingService;
 
     @Override
     @Transactional
     public LocationResponse createLocation(LocationRequest request) {
 
-        if (request.getAddress() == null || request.getLatitude()== null ||
-                request.getLongitude() == null) {
-            throw new BadRequestException("Address or Latitude/Longitude is null");
+        // Nếu Client không truyền vĩ/kinh độ, dùng Geocoding tự tính địa chỉ
+        if (request.getLatitude()== null || request.getLongitude() == null) {
+            log.info("Client ch truyền Address, tự động dò toạ độ: {}", request.getAddress());
+            Coordinate coordinate = geocodingService.geocode(request.getAddress());
+            if (coordinate == null) {
+                throw new BadRequestException("Địa chỉ không được tìm thấy, vui lòng nhập tay");
+            }
+
+            // điền vào request
+            request.setLatitude(BigDecimal.valueOf(coordinate.getLatitude()));
+            request.setLongitude(BigDecimal.valueOf(coordinate.getLongitude()));
         }
 
         Location location = Location.builder()
