@@ -37,7 +37,7 @@ public class LocationServiceImpl implements LocationService {
 
         // Nếu Client không truyền vĩ/kinh độ, dùng Geocoding tự tính địa chỉ
         if (request.getLatitude()== null || request.getLongitude() == null) {
-            log.info("Client ch truyền Address, tự động dò toạ độ: {}", request.getAddress());
+            log.info("Client chỉ truyền Address, tự động dò toạ độ: {}", request.getAddress());
             Coordinate coordinate = geocodingService.geocode(request.getAddress());
             if (coordinate == null) {
                 throw new BadRequestException("Địa chỉ không được tìm thấy, vui lòng nhập tay");
