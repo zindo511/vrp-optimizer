@@ -21,6 +21,8 @@ import vn.ttcs.vrp.service.GeocodingService;
 import vn.ttcs.vrp.service.LocationService;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -46,6 +48,18 @@ public class LocationServiceImpl implements LocationService {
             // điền vào request
             request.setLatitude(BigDecimal.valueOf(coordinate.getLatitude()));
             request.setLongitude(BigDecimal.valueOf(coordinate.getLongitude()));
+        }
+
+        // làm tròn 4 chữ số thập phần (bán kính khoảng 11 mét)
+        BigDecimal snappedLat = request.getLatitude().setScale(4, RoundingMode.HALF_UP);
+        BigDecimal snappedLong = request.getLongitude().setScale(4, RoundingMode.HALF_UP);
+
+        // chặn sinh rác: kiểm tra xem lat và lon đã có trog db chưa
+        Optional<Location> duplicatedCheck = locationRepository.findByLatitudeAndLongitude(snappedLat, snappedLong);
+        if (duplicatedCheck.isPresent()) {
+            Location existsLoc = duplicatedCheck.get();
+            log.info("Tái sử dụng cho toạ độ: {}, {}, không cần tạo cái mới nữa", snappedLat, snappedLong);
+            return locationMapper.toResponse(existsLoc);
         }
 
         Location location = Location.builder()
