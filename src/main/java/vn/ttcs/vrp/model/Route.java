@@ -29,6 +29,10 @@ public class Route extends BaseEntity{
     @JoinColumn(name = "vehicle_id", nullable = false)
     private Vehicle vehicle;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "driver_id")
+    private Driver driver;
+
     @Column(name = "total_distance_meters", precision = 10, scale = 2)
     private BigDecimal totalDistanceMeters;
 

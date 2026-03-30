@@ -47,6 +47,14 @@ public class RouteStop {
     @Column(name = "actual_arrival")
     private LocalDateTime actualArrival;
 
+    @Column(name = "proof_image_url")
+    private String proofImageUrl;
+
+    private String note;
+
+    @Column(name = "failure_reason")
+    private String failureReason;
+
     @Enumerated(EnumType.STRING)
     @Column(length = 50, nullable = false)
     @Builder.Default

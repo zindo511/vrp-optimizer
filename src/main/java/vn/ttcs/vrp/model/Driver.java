@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import vn.ttcs.vrp.enums.DriverStatus;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "drivers")
 @Getter
@@ -31,4 +33,10 @@ public class Driver {
     @Column(length = 50, nullable = false)
     @Builder.Default
     private DriverStatus status = DriverStatus.ACTIVE;
+
+    @Column(name = "current_lat")
+    private Double currentLat;
+
+    @Column(name = "current_lng")
+    private Double currentLng;
 }
