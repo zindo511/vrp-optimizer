@@ -40,7 +40,7 @@ public class OsrmClientServiceImpl implements OsrmClientService {
 
         try {
             // ko dùng builder param vì rescline mã hoá ; gây sập
-            String uri = "/table/v1/driving/" + coordinates + "?annotations=duration, distance";
+            String uri = "/table/v1/driving/" + coordinates + "?annotations=duration,distance";
 
             return restClient.get()
                     .uri(uri)

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import vn.ttcs.vrp.enums.OrderStatus;
 import vn.ttcs.vrp.model.Order;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -21,4 +22,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @EntityGraph(attributePaths = { "location", "user" })
     Optional<Order> findById(Long id);
+
+    @EntityGraph(attributePaths = {"location"})
+    List<Order> findAllByStatus(OrderStatus status);
 }
