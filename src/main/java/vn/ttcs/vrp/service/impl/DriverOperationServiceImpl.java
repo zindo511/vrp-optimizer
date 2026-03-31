@@ -9,6 +9,7 @@ import vn.ttcs.vrp.dto.request.StopStatusRequest;
 import vn.ttcs.vrp.dto.response.MyRouteResponse;
 import vn.ttcs.vrp.dto.response.RouteStopResponse;
 import vn.ttcs.vrp.enums.OrderStatus;
+import vn.ttcs.vrp.enums.RouteStatus;
 import vn.ttcs.vrp.enums.RouteStopStatus;
 import vn.ttcs.vrp.exception.ResourceNotFoundException;
 import vn.ttcs.vrp.model.Driver;
@@ -90,6 +91,19 @@ public class DriverOperationServiceImpl implements DriverOperationService {
             OrderStatus newStatus = (request.getStopStatus() == RouteStopStatus.COMPLETED)
                     ? OrderStatus.COMPLETED : OrderStatus.FAILED;
             stop.getOrder().setStatus(newStatus);
+        }
+
+        Route route = stop.getRoute();
+        if (route.getStatus() == RouteStatus.PLANNED)
+            route.setStatus(RouteStatus.IN_PROGRESS);
+
+
+        boolean allConfirmed = route.getRouteStops().stream()
+                        .allMatch(s -> s.getStatus() == RouteStopStatus.COMPLETED || s.getStatus() == RouteStopStatus.FAILED);
+
+        if (allConfirmed) {
+            route.setStatus(RouteStatus.COMPLETED);
+            log.info("Tuyến đường: {} đã hoàn thành", route.getId());
         }
 
         log.info("Stop: {}, tình trạng: {} bởi tài xế: {}", id, request.getStopStatus(), driver.getUser().getEmail());
