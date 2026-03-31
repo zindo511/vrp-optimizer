@@ -10,6 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import vn.ttcs.vrp.dto.ApiResponse;
 import vn.ttcs.vrp.dto.request.DriverRequest;
+import vn.ttcs.vrp.dto.request.StopStatusRequest;
 import vn.ttcs.vrp.dto.request.UpdateDriverRequest;
 import vn.ttcs.vrp.dto.request.UpdateDriverStatusRequest;
 import vn.ttcs.vrp.dto.response.DriverResponse;
@@ -97,4 +98,17 @@ public class DriverController {
                 "Lộ trình hôm nay của bạn", routeResponse
         ));
     }
+
+    // API: Cập nhật trạng thái giao hàng (Giao xong/Thất bại)
+    @PutMapping("/stops/{stopId}/status")
+    @PreAuthorize("hasRole('DRIVER')")
+    public ResponseEntity<ApiResponse<Void>> updateStopStatus(
+            @PathVariable Long stopId,
+            @Valid @RequestBody StopStatusRequest request
+    ) {
+        driverOperationService.updateStopStatus(stopId, request);
+        return ResponseEntity.ok(ApiResponse.success("Cập nhật trạng thái thành công"));
+    }
+
+    //API: cập nhật trạng thái sau nâng cấp sử dụng web socket
 }
