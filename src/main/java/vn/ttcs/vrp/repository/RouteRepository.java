@@ -14,4 +14,7 @@ public interface RouteRepository extends JpaRepository<Route, Long> {
 
     @EntityGraph(attributePaths = { "vehicle", "startDepot", "routeStops", "routeStops.order", "routeStops.location" })
     Optional<Route> findByDriverAndRouteDate(Driver driver, LocalDate routeDate);
+
+    @EntityGraph(attributePaths = { "driver" })
+    Optional<Route> findById(Long id);
 }
