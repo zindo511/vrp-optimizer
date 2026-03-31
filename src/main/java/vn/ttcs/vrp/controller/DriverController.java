@@ -13,7 +13,9 @@ import vn.ttcs.vrp.dto.request.DriverRequest;
 import vn.ttcs.vrp.dto.request.UpdateDriverRequest;
 import vn.ttcs.vrp.dto.request.UpdateDriverStatusRequest;
 import vn.ttcs.vrp.dto.response.DriverResponse;
+import vn.ttcs.vrp.dto.response.MyRouteResponse;
 import vn.ttcs.vrp.enums.DriverStatus;
+import vn.ttcs.vrp.service.DriverOperationService;
 import vn.ttcs.vrp.service.DriverService;
 
 @RestController
@@ -23,6 +25,7 @@ import vn.ttcs.vrp.service.DriverService;
 public class DriverController {
 
     private final DriverService driverService;
+    private final DriverOperationService driverOperationService;
 
     @PostMapping
     @PreAuthorize("hasAnyRole('DISPATCHER', 'ADMIN')")
@@ -80,6 +83,18 @@ public class DriverController {
         DriverResponse response = driverService.updateDriverStatus(id, request.getDriverStatus());
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(
                 "Cập nhật trạng thái tài xế thành công", response
+        ));
+    }
+
+    // ===== DRIVER APP APIS -  TÀI XẾ ĐĂNG NHẬP THÌ MỚI CÓ
+
+    // API: Tải lộ trình của ngày hôm nay
+    @GetMapping("/my-route")
+    @PreAuthorize("hasRole('DRIVER')")
+    public ResponseEntity<ApiResponse<MyRouteResponse>> getMyTodayRoutes() {
+        MyRouteResponse routeResponse = driverOperationService.getMyTodayRoutes();
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(
+                "Lộ trình hôm nay của bạn", routeResponse
         ));
     }
 }
