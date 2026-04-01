@@ -71,6 +71,14 @@ public class GlobalExceptionHandler {
         ));
     }
 
+    @ExceptionHandler(FileStorageException.class)
+    public ResponseEntity<ApiResponse<Void>> handleFileStorageException(
+            FileStorageException ex, HttpServletRequest request
+    ) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiResponse.error(
+                500, ex.getMessage(), request.getRequestURI()
+        ));
+    }
     // ---- 500 Internal Server Error - fallback cho tất cả exception chưa được xử lý
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleException(Exception ex, HttpServletRequest request) {
