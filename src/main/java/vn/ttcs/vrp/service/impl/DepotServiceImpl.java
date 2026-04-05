@@ -31,9 +31,12 @@ public class DepotServiceImpl implements DepotService {
     @Transactional
     public DepotResponse createDepot(DepotRequest request) {
 
-        if (request.getStartTime().isBefore(request.getEndTime())) {
-            throw new BadRequestException("Start time không thể sau end time");
+        if (request.getStartTime() != null && request.getEndTime() != null) {
+            if (request.getStartTime().isAfter(request.getEndTime())) {
+                throw new BadRequestException("Start time không thể sau end time");
+            }
         }
+
         Location location = locationRepository.findById(request.getLocationId())
                 .orElseThrow(() -> new ResourceNotFoundException("location không được tìm thấy"));
         Depot depot = Depot.builder()
