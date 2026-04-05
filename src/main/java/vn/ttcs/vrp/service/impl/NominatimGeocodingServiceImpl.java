@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.util.UriComponentsBuilder;
 import vn.ttcs.vrp.dto.Coordinate;
 import vn.ttcs.vrp.service.GeocodingService;
 
@@ -31,15 +30,15 @@ public class NominatimGeocodingServiceImpl implements GeocodingService {
 
         log.info("Đang gọi OSM Nominatim API bằng ResClinet để lấy toạ độ cho: {}", address);
 
-        String uri = UriComponentsBuilder.fromPath("/search") // url = base url + (path + uri)
-                .queryParam("q", address)
-                .queryParam("format", "json")
-                .queryParam("limit", 1)
-                .toUriString();
-
         // validate dữ liệu
         List<Map<String, Object>> result = restClient.get()
-                .uri(uri)
+                .uri(uriBuilder -> uriBuilder
+                        .path("/search")
+                        .queryParam("q", address)
+                        .queryParam("format", "json")
+                        .queryParam("limit", 5)
+                        .build()
+                )
                 .retrieve()
                 .body(new ParameterizedTypeReference<>() {});
 

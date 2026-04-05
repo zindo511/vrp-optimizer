@@ -16,9 +16,7 @@ public class LocationRequest {
     @NotBlank(message = "Địa chỉ không được bỏ trống")
     private String address;
 
-    @NotNull(message = "Vĩ độ không được để trống")
     private BigDecimal latitude;
 
-    @NotNull(message = "Kinh độ không được để trống")
     private BigDecimal longitude;
 }
