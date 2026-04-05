@@ -11,17 +11,19 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 public class RouteStopResponse {
+
     private Long id;
-    private Integer stopOrders;
+    private Integer stopOrder;
     private String customerName;
     private String customerPhone;
     private String address;
     private Double lat;
     private Double lng;
-    private LocalDateTime estimateArrival;
+    private LocalDateTime estimatedArrival;
     private LocalDateTime actualArrival;
     private RouteStopStatus status;
     private String proofImageUrl;
     private String note;
     private Double weightKg;
+    private String failureReason;
 }
