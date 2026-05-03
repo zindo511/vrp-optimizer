@@ -19,4 +19,6 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
 
     @EntityGraph(attributePaths = {"vehicleType"})
     List<Vehicle> findAllByStatus(VehicleStatus status);
+
+    long countByStatus(VehicleStatus status);
 }

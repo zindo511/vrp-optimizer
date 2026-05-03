@@ -25,4 +25,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @EntityGraph(attributePaths = {"location"})
     List<Order> findAllByStatus(OrderStatus status);
+
+    long countByStatus(OrderStatus status);
 }

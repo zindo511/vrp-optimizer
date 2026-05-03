@@ -31,3 +31,22 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Environment & Secrets ###
+.env
+.env.local
+.env.*.local
+
+### Uploads (user-generated files) ###
+uploads/
+
+### Frontend ###
+vrp-frontend/node_modules/
+vrp-frontend/dist/
+
+### Docker ###
+docker-compose.override.yml
+
+### OS ###
+.DS_Store
+Thumbs.db

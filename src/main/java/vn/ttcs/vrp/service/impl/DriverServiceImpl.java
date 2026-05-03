@@ -11,13 +11,16 @@ import vn.ttcs.vrp.dto.request.DriverRequest;
 import vn.ttcs.vrp.dto.request.UpdateDriverRequest;
 import vn.ttcs.vrp.dto.response.DriverResponse;
 import vn.ttcs.vrp.enums.DriverStatus;
+import vn.ttcs.vrp.exception.BadRequestException;
 import vn.ttcs.vrp.exception.DuplicateResourceException;
 import vn.ttcs.vrp.exception.ResourceNotFoundException;
 import vn.ttcs.vrp.mapper.DriverMapper;
 import vn.ttcs.vrp.model.Driver;
 import vn.ttcs.vrp.model.User;
+import vn.ttcs.vrp.model.Vehicle;
 import vn.ttcs.vrp.repository.DriverRepository;
 import vn.ttcs.vrp.repository.UserRepository;
+import vn.ttcs.vrp.repository.VehicleRepository;
 import vn.ttcs.vrp.service.DriverService;
 
 @Service
@@ -26,6 +29,7 @@ public class DriverServiceImpl implements DriverService {
 
     private final DriverRepository driverRepository;
     private final UserRepository userRepository;
+    private final VehicleRepository vehicleRepository;
     private final DriverMapper driverMapper;
 
     @Override
@@ -49,6 +53,10 @@ public class DriverServiceImpl implements DriverService {
         driver.setUser(user);
         if (driver.getStatus() == null)
             driver.setStatus(DriverStatus.ACTIVE);
+
+        // Gán xe nếu có vehicleId
+        assignVehicle(driver, request.getVehicleId());
+
         return driverMapper.toResponse(driverRepository.save(driver));
     }
 
@@ -87,12 +95,18 @@ public class DriverServiceImpl implements DriverService {
         Driver driver = getDriverById(id);
 
         if (request.getLicenseNumber() != null && !request.getLicenseNumber().equals(driver.getLicenseNumber())) {
-            if (!driverRepository.existsByLicenseNumber(request.getLicenseNumber())) {
+            if (driverRepository.existsByLicenseNumber(request.getLicenseNumber())) {
                 throw new DuplicateResourceException("Đã tồn tại giấy phép lái xe: " + request.getLicenseNumber());
             }
         }
 
         driverMapper.updateDriver(request, driver);
+
+        // Gán xe nếu vehicleId được gửi lên
+        if (request.getVehicleId() != null) {
+            assignVehicle(driver, request.getVehicleId());
+        }
+
         return driverMapper.toResponse(driverRepository.save(driver));
     }
 
@@ -103,11 +117,45 @@ public class DriverServiceImpl implements DriverService {
         return driverMapper.toResponse(driverRepository.save(driver));
     }
 
+    @Override
+    @Transactional
+    public void deleteDriver(Long id) {
+        Driver driver = getDriverById(id);
+        driverRepository.delete(driver);
+    }
+
     // ==== PRIVATE HELPER ====
     private Driver getDriverById(Long id) {
         return driverRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài xế với id: " + id));
     }
 
+    /**
+     * Gán xe cho tài xế.
+     * - vehicleId == null → bỏ qua (không thay đổi)
+     * - vehicleId == 0 → gỡ xe khỏi tài xế
+     * - vehicleId > 0 → gán xe, kiểm tra xe chưa thuộc tài xế khác
+     */
+    private void assignVehicle(Driver driver, Long vehicleId) {
+        if (vehicleId == null) return;
 
+        // vehicleId = 0 → gỡ gán xe
+        if (vehicleId == 0) {
+            driver.setVehicle(null);
+            return;
+        }
+
+        Vehicle vehicle = vehicleRepository.findById(vehicleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy xe với id: " + vehicleId));
+
+        // Kiểm tra xe đã được gán cho tài xế khác chưa
+        driverRepository.findByVehicle(vehicle).ifPresent(existingDriver -> {
+            if (!existingDriver.getId().equals(driver.getId())) {
+                throw new BadRequestException(
+                        "Xe " + vehicle.getLicensePlate() + " đã được gán cho tài xế id=" + existingDriver.getId());
+            }
+        });
+
+        driver.setVehicle(vehicle);
+    }
 }

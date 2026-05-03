@@ -16,4 +16,7 @@ public class UpdateDriverRequest {
 
     @Pattern(regexp = "^[0-9]{10,11}$", message = "Số điện thoại không hợp lệ (10-11 chữ số)")
     private String phone;
+
+    // null → không thay đổi; giá trị hợp lệ → đổi sang xe mới
+    private Long vehicleId;
 }

@@ -17,4 +17,6 @@ public class DriverResponse {
     private String licenseNumber;
     private String phone;
     private DriverStatus status;
+    private Long vehicleId;
+    private String vehicleLicensePlate;
 }

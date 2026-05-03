@@ -3,6 +3,8 @@ package vn.ttcs.vrp.solver;
 import vn.ttcs.vrp.dto.vrp.VrpSolutionDto;
 import vn.ttcs.vrp.model.*;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +19,8 @@ public interface VrpSolver {
             List<Vehicle> vehicles,
             Location depotLocation,
             Map<String, DistanceMatrix> distanceMap,
-            AlgorithmConfig config
+            AlgorithmConfig config,
+            LocalDate routeDate,
+            LocalTime depotStartTime
     );
 }

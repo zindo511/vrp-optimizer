@@ -27,4 +27,10 @@ public class PlannedRouteDto {
     private double totalDistanceMeters;
     private long totalDurationSeconds;
     private double totalWeightKg;
+
+    /**
+     * Tổng chi phí vận hành thực tế của tuyến = fixedCost + costPerKm × km
+     * Dùng để so sánh hiệu quả kinh tế giữa các phương án phân tuyến
+     */
+    private double totalCostVnd;
 }

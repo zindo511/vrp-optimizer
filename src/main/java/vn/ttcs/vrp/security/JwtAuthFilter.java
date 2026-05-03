@@ -42,19 +42,13 @@ public class JwtAuthFilter extends OncePerRequestFilter { // gác cổng, kiểm
             // Móc hồ sơ User từ DB lên để so sánh và lấy quyền (Role)
             if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-                System.out.println("========== DEBUG SECURITY ==========");
-                System.out.println("1. Tìm thấy Email từ Token: " + email);
-                System.out.println("2. Quyền dưới Database (Authorities): " + userDetails.getAuthorities());
-                System.out.println("3. Token có hợp lệ không? " + jwtUtils.isTokenValid(jwt, userDetails));
-                System.out.println("====================================");
 
                 // kiểm tra token (chữ ký, đúng tên, chưa hết hạn)
                 if (jwtUtils.isTokenValid(jwt, userDetails)) {
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             userDetails,
                             null,
-                            userDetails.getAuthorities()
-                    );
+                            userDetails.getAuthorities());
 
                     authToken.setDetails(new WebAuthenticationDetails(request));
 

@@ -22,4 +22,9 @@ public class VrpSolutionDto {
     private int unassignedOrderCount;
 
     private double totalDistanceMeters;
+
+    /**
+     * Tổng chi phí vận hành = Σ(fixedCost + costPerKm × km) của tất cả các tuyến
+     */
+    private double totalCostVnd;
 }

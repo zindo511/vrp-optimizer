@@ -9,11 +9,11 @@ import vn.ttcs.vrp.model.Route;
 public interface RouteMapper {
 
     @Mapping(target = "vehicleLicensePlate", source = "vehicle.licensePlate")
-    @Mapping(target = "vehicleTypeName", source = "vehicleType.name")
+    @Mapping(target = "vehicleTypeName", source = "vehicle.vehicleType.name")
     @Mapping(target = "driverName", source = "driver.user.fullName")
     @Mapping(target = "driverPhone", source = "driver.phone")
     @Mapping(target = "totalDistanceKm", expression =
-            "java(route.totalDistanceMeters != null ? route.totalDistanceMeters.doubleValue() / 1000 : null)")
+            "java(route.getTotalDistanceMeters() != null ? route.getTotalDistanceMeters().doubleValue() / 1000 : null)")
     @Mapping(target = "totalDurationMinutes", expression = "java(route.getTotalDurationSeconds() != null ? route.getTotalDurationSeconds() / 60 : null)")
     @Mapping(target = "totalWeightKg", expression = "java(route.getTotalWeightKg() != null ? route.getTotalWeightKg().doubleValue() : null)")
     RouteResponse toRouteResponse(Route route);

@@ -2,10 +2,13 @@ package vn.ttcs.vrp.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import vn.ttcs.vrp.dto.request.LocationUpdateRequest;
 import vn.ttcs.vrp.dto.request.StopStatusRequest;
+import vn.ttcs.vrp.dto.response.DriverLocationMessage;
 import vn.ttcs.vrp.dto.response.MyRouteResponse;
 import vn.ttcs.vrp.dto.response.RouteStopResponse;
 import vn.ttcs.vrp.enums.OrderStatus;
@@ -37,6 +40,7 @@ public class DriverOperationServiceImpl implements DriverOperationService {
     private final UserRepository userRepository;
     private final RouteRepository routeRepository;
     private final RouteStopRepository routeStopRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     // API: tài xế lấy lộ trình hôm nay
     @Override
@@ -109,6 +113,26 @@ public class DriverOperationServiceImpl implements DriverOperationService {
         log.info("Stop: {}, tình trạng: {} bởi tài xế: {}", id, request.getStopStatus(), driver.getUser().getEmail());
     }
 
+
+    // API: tài xế cập nhật vị trí GPS
+    @Override
+    @Transactional
+    public void updateMyLocation(LocationUpdateRequest request) {
+        Driver driver = getCurrentUser();
+        driver.setCurrentLat(request.getLat());
+        driver.setCurrentLng(request.getLng());
+        driverRepository.save(driver);
+
+        messagingTemplate.convertAndSend("/topic/driver-location",
+                DriverLocationMessage.builder()
+                        .driverId(driver.getId())
+                        .driverName(driver.getUser().getFullName())
+                        .lat(request.getLat())
+                        .lng(request.getLng())
+                        .build());
+
+        log.info("Tài xế {} cập nhật vị trí: {},{}", driver.getUser().getEmail(), request.getLat(), request.getLng());
+    }
 
     // ===== PRIVATE HEPLPER =====
     private Driver getCurrentUser() {

@@ -33,8 +33,9 @@ public class RouteServiceImpl implements RouteService {
 
         Driver driver = driverRepository.findById(driverId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài xế với id: " + driverId));
-        if (route.getDriver() == null)
-            route.setDriver(driver);
+
+        route.setDriver(driver);
+        routeRepository.save(route);
 
         log.info("Gán thành công tuyến đường: {} cho tài xế: {}", routeId, driverId);
     }
@@ -50,8 +51,9 @@ public class RouteServiceImpl implements RouteService {
     @Override
     @Transactional(readOnly = true)
     public List<RouteResponse> getRouteByDate(LocalDate date, RouteStatus status) {
-
-        List<Route> route = routeRepository.findAllByRouteDateAndStatus(date, status);
+        List<Route> route = (status == null)
+                ? routeRepository.findAllByRouteDate(date)
+                : routeRepository.findAllByRouteDateAndStatus(date, status);
         return route.stream().map(routeMapper::toRouteResponse).toList();
     }
 

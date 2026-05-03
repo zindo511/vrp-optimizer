@@ -79,6 +79,7 @@ public class AuthServiceImpl implements AuthService {
         return AuthResponse.builder()
                 .accessToken(jwtUtils.generateToken(userDetails))
                 .refreshToken(Objects.requireNonNull(refreshToken).getToken())
+                .role(userDetails.user().getRole().name())
                 .build();
     }
 

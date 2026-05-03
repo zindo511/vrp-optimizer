@@ -23,4 +23,7 @@ public class DriverRequest {
     @NotBlank(message = "Số điện thoại không được để trống")
     @Pattern(regexp = "^[0-9]{10,11}$", message = "Số điện thoại không hợp lệ (10-11 chữ số)")
     private String phone;
+
+    // Optional — dispatcher có thể gán xe sau khi tạo driver
+    private Long vehicleId;
 }

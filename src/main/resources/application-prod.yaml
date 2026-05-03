@@ -1,0 +1,30 @@
+# ═══════════════════════════════════════════════════════════════════
+# application-prod.yaml — Production profile
+# ═══════════════════════════════════════════════════════════════════
+# Activate with: --spring.profiles.active=prod
+# hoặc SPRING_PROFILES_ACTIVE=prod (set trong docker-compose)
+
+spring:
+  jpa:
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+
+# Prod nên self-host OSRM (docker run -p 5000:5000 osrm/osrm-backend)
+# Fallback tới public nếu chưa setup
+osrm:
+  base-url: ${OSRM_BASE_URL:http://osrm:5000}
+
+# Tắt Swagger UI trên prod (bảo mật)
+springdoc:
+  swagger-ui:
+    enabled: false
+  api-docs:
+    enabled: false
+
+logging:
+  level:
+    vn.ttcs.vrp: INFO
+    org.springframework: WARN
+    org.hibernate: WARN

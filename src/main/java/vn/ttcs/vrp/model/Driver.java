@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import vn.ttcs.vrp.enums.DriverStatus;
 
-import java.math.BigDecimal;
-
 @Entity
 @Table(name = "drivers")
 @Getter
@@ -33,6 +31,12 @@ public class Driver {
     @Column(length = 50, nullable = false)
     @Builder.Default
     private DriverStatus status = DriverStatus.ACTIVE;
+
+    // Xe được gán cho tài xế này — nullable (driver có thể chưa có xe)
+    // UNIQUE ở DB level: một xe chỉ có một driver tại một thời điểm
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "vehicle_id")
+    private Vehicle vehicle;
 
     @Column(name = "current_lat")
     private Double currentLat;

@@ -10,6 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import vn.ttcs.vrp.dto.ApiResponse;
 import vn.ttcs.vrp.dto.request.DriverRequest;
+import vn.ttcs.vrp.dto.request.LocationUpdateRequest;
 import vn.ttcs.vrp.dto.request.StopStatusRequest;
 import vn.ttcs.vrp.dto.request.UpdateDriverRequest;
 import vn.ttcs.vrp.dto.request.UpdateDriverStatusRequest;
@@ -43,8 +44,8 @@ public class DriverController {
     public ResponseEntity<ApiResponse<Page<DriverResponse>>> findAllDrivers(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam("id") String sortBy,
-            @RequestParam("asc") String sortDir,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir,
             @RequestParam(required = false) DriverStatus status
     ) {
         Page<DriverResponse> driverResponses = driverService.findAllDrivers(page, size, sortBy, sortDir, status);
@@ -87,6 +88,13 @@ public class DriverController {
         ));
     }
 
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('DISPATCHER', 'ADMIN')")
+    public ResponseEntity<ApiResponse<Void>> deleteDriver(@PathVariable Long id) {
+        driverService.deleteDriver(id);
+        return ResponseEntity.ok(ApiResponse.success("Xóa tài xế thành công"));
+    }
+
     // ===== DRIVER APP APIS -  TÀI XẾ ĐĂNG NHẬP THÌ MỚI CÓ
 
     // API: Tải lộ trình của ngày hôm nay
@@ -110,5 +118,13 @@ public class DriverController {
         return ResponseEntity.ok(ApiResponse.success("Cập nhật trạng thái thành công"));
     }
 
-    //API: cập nhật trạng thái sau nâng cấp sử dụng web socket
+    // API: tài xế cập nhật vị trí GPS hiện tại
+    @PatchMapping("/me/location")
+    @PreAuthorize("hasRole('DRIVER')")
+    public ResponseEntity<ApiResponse<Void>> updateMyLocation(
+            @Valid @RequestBody LocationUpdateRequest request
+    ) {
+        driverOperationService.updateMyLocation(request);
+        return ResponseEntity.ok(ApiResponse.success("Cập nhật vị trí thành công"));
+    }
 }

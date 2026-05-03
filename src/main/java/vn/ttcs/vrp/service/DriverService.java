@@ -22,4 +22,7 @@ public interface DriverService {
 
     // cập nhật trạng thái tài xế
     DriverResponse updateDriverStatus(Long id, DriverStatus driverStatus);
+
+    // xóa tài xế
+    void deleteDriver(Long id);
 }

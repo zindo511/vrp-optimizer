@@ -44,6 +44,9 @@ public class OptimizationResult {
     @Column(name = "total_distance", precision = 10, scale = 2)
     private BigDecimal totalDistance;
 
+    @Column(name = "total_cost", precision = 12, scale = 2)
+    private BigDecimal totalCost;
+
     @Column(name = "execution_time_ms")
     private Long executionTimeMs;
 
