@@ -13,8 +13,8 @@ import java.util.List;
 public interface DistanceMatrixRepository extends JpaRepository<DistanceMatrix, Long> {
 
     @Query("select d from DistanceMatrix d " +
-            "where d.origin in :locationIds " +
-            "and d.destination in :locationIds")
+            "where d.origin.id in :locationIds " +
+            "and d.destination.id in :locationIds")
     List<DistanceMatrix> findAllByOriginAndDestination(List<Long> locationIds);
 
     @Modifying

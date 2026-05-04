@@ -44,6 +44,29 @@ osrm-circuit-breaker:
   failure-threshold: 3
   reset-timeout-ms: 60000
 
+# ── Actuator — Health Check, Metrics ─────────────────────────────
+# Docker/K8s dùng /actuator/health để biết app có sống không.
+# Nếu DOWN → auto-restart container.
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized   # chỉ show chi tiết khi có JWT
+      show-components: when-authorized
+  info:
+    env:
+      enabled: true
+
+# ── App Info (hiện qua /actuator/info) ───────────────────────────
+info:
+  app:
+    name: VRP Optimizer
+    version: 1.0.0
+    description: Vehicle Routing Problem Optimization Engine
+
 logging:
   level:
     org:

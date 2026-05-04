@@ -1,199 +1,937 @@
+/* ═══════════════════════════════════════════════════
+   OPTIMIZATION DASHBOARD — Google Maps Inspired
+   ═══════════════════════════════════════════════════ */
+
 .optimization-page {
-  height: calc(100vh - 120px);
+  height: calc(100vh - 70px);
   display: flex;
   flex-direction: column;
-}
-
-.optimization-layout {
-  display: grid;
-  grid-template-columns: 320px 1fr;
-  gap: 20px;
-  flex: 1;
   overflow: hidden;
 }
 
-.optimization-panel {
-  display: flex;
-  flex-direction: column;
-  padding: 0 !important;
-  overflow: hidden;
-}
-
-.panel-section {
-  padding: 20px;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.section-title {
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  letter-spacing: 0.05em;
-  margin-bottom: 16px;
-}
-
-.optimization-map {
-  padding: 0 !important;
-  overflow: hidden;
-  border: 1px solid var(--border-color);
-}
-
-.route-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.route-item {
-  background: white;
-  border: 1px solid var(--border-color);
-  border-left-width: 4px;
-  padding: 12px 16px;
-  border-radius: var(--radius-sm);
+/* ── Top Header Bar ──────────────────────────────── */
+.opt-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  cursor: pointer;
-  transition: all 0.2s;
+  height: 56px;
+  padding: 0 20px;
+  background: white;
+  border-bottom: 1px solid #c6c6cd;
+  flex-shrink: 0;
+  z-index: 10;
 }
 
-.route-item:hover {
-  background: #f8fafc;
-  transform: translateX(4px);
+.opt-header-title {
+  font-family: 'Manrope', var(--font-heading, sans-serif);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0b1c30;
+  letter-spacing: -0.01em;
 }
 
-.route-vehicle {
+.opt-header-actions {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-weight: 700;
-  color: var(--text-main);
-  font-size: 0.875rem;
-  margin-bottom: 4px;
 }
 
-.route-stats {
-  font-size: 0.75rem;
-  color: var(--text-muted);
+.opt-btn {
   display: flex;
   align-items: center;
   gap: 6px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: none;
+  white-space: nowrap;
 }
 
-.dot {
-  font-size: 1rem;
-  line-height: 0;
+.opt-btn-danger {
+  background: #ba1a1a;
+  color: white;
 }
 
-.status-message {
-  margin: 16px 20px 0;
-  padding: 12px;
-  border-radius: var(--radius-sm);
+.opt-btn-danger:hover:not(:disabled) {
+  background: #a21818;
+}
+
+.opt-btn-outline {
+  background: white;
+  color: #0b1c30;
+  border: 1px solid #76777d;
+}
+
+.opt-btn-outline:hover:not(:disabled) {
+  background: #eff4ff;
+}
+
+.opt-btn-primary {
+  background: #1a73e8;
+  color: white;
+}
+
+.opt-btn-primary:hover:not(:disabled) {
+  background: #1557b0;
+}
+
+.opt-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.opt-btn-icon {
+  font-size: 1.125rem;
+  line-height: 1;
+}
+
+/* ── Main Layout ─────────────────────────────────── */
+.opt-body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  padding: 0;
+  gap: 0;
+  background: #f1f3f4;
+}
+
+/* ── Left Column ─────────────────────────────────── */
+.opt-left {
+  width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  flex-shrink: 0;
+  overflow-y: auto;
+  padding: 0;
+  background: white;
+  border-right: 1px solid #dadce0;
+  box-shadow: 2px 0 8px rgba(0,0,0,0.08);
+  z-index: 5;
+}
+
+/* ── Config Card ─────────────────────────────────── */
+.opt-config-card {
+  background: white;
+  border: none;
+  border-bottom: 1px solid #e8eaed;
+  border-radius: 0;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.opt-section-title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #5f6368;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e8eaed;
+  margin-bottom: 4px;
+}
+
+.opt-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.opt-field label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #202124;
+}
+
+.opt-field select,
+.opt-field input[type="date"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  background: #f8f9fa;
+  color: #202124;
+  font-size: 0.875rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  box-shadow: none;
+}
+
+.opt-field select:focus,
+.opt-field input[type="date"]:focus {
+  border-color: #1a73e8;
+  box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.15);
+  background: white;
+}
+
+/* ── Algorithm Info Box ─────────────────────────── */
+.opt-algo-info {
+  padding: 10px 12px;
+  background: #e8f0fe;
+  border: 1px solid #d2e3fc;
+  border-radius: 8px;
+}
+
+.opt-algo-name {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #1a73e8;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.opt-algo-params {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px 10px;
+}
+
+.opt-algo-params .param-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: #5f6368;
+  padding: 2px 0;
+}
+
+.opt-algo-params .param-row strong {
+  font-weight: 600;
+  color: #202124;
+}
+
+.opt-algo-desc {
+  margin-top: 6px;
+  font-size: 0.75rem;
+  color: #80868b;
+  font-style: italic;
+  line-height: 1.4;
+}
+
+/* ── Route List Section ──────────────────────────── */
+.opt-route-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+}
+
+.opt-route-section > .opt-section-title {
+  padding: 12px 20px 8px;
+  margin-bottom: 0;
+  border-bottom: none;
+}
+
+/* ── Route Card (Google Maps side-panel style) ───── */
+.opt-route-card {
+  background: white;
+  border: none;
+  border-bottom: 1px solid #e8eaed;
+  border-left: 4px solid transparent;
+  border-radius: 0;
+  padding: 14px 20px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.opt-route-card:hover {
+  background: #f1f3f4;
+}
+
+.opt-route-card.active {
+  background: #e8f0fe;
+  border-left: 4px solid #1a73e8;
+}
+
+.opt-route-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.opt-route-plate {
+  font-family: 'Google Sans', 'Manrope', var(--font-heading, sans-serif);
+  font-size: 1rem;
+  font-weight: 700;
+  color: #202124;
+  letter-spacing: -0.01em;
+}
+
+.opt-route-badge {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+}
+
+.opt-route-badge.optimized {
+  background: #ceead6;
+  color: #137333;
+}
+
+.opt-route-badge.planned {
+  background: #e8f0fe;
+  color: #1a73e8;
+}
+
+/* Route stats grid */
+.opt-route-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 12px;
+}
+
+.opt-stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #5f6368;
+}
+
+.opt-stat-icon {
+  color: #9aa0a6;
+  flex-shrink: 0;
+}
+
+/* ── Status Messages ─────────────────────────────── */
+.opt-status {
+  padding: 12px 20px;
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   font-size: 0.8125rem;
+  font-weight: 500;
+  border-bottom: 1px solid #e8eaed;
 }
 
-.status-message.success {
-  background: #f0fdf4;
-  color: #166534;
-  border: 1px solid #bbf7d0;
+.opt-status.success {
+  background: #e6f4ea;
+  color: #137333;
+  border: none;
+  border-bottom: 1px solid #ceead6;
 }
 
-.status-message.error {
-  background: #fef2f2;
-  color: #991b1b;
-  border: 1px solid #fecaca;
+.opt-status.error {
+  background: #fce8e6;
+  color: #c5221f;
+  border: none;
+  border-bottom: 1px solid #f5c7c5;
 }
 
-.empty-routes {
+/* ── Empty State ─────────────────────────────────── */
+.opt-empty {
   padding: 40px 20px;
   text-align: center;
-  color: #cbd5e1;
+  color: #dadce0;
 }
 
-.empty-routes p {
+.opt-empty p {
   font-size: 0.8125rem;
   margin-top: 12px;
+  color: #80868b;
 }
 
-/* Custom Marker Styling */
-.marker-pin {
-  width: 24px;
-  height: 24px;
-  border-radius: 50% 50% 50% 0;
-  transform: rotate(-45deg);
+/* ── Right Column (Map) ──────────────────────────── */
+.opt-map {
+  flex: 1;
+  background: #e5e3df;
+  border: none;
+  border-radius: 0;
+  overflow: hidden;
+  position: relative;
+  box-shadow: none;
+}
+
+/* ── Leaflet Marker Overrides ────────────────────── */
+.custom-div-icon {
+  background: transparent !important;
+  border: none !important;
+}
+
+.route-arrow-icon {
+  background: transparent !important;
+  border: none !important;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid white;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
 }
 
-.marker-pin span {
-  transform: rotate(45deg);
-  color: white;
-  font-size: 10px;
-  font-weight: 800;
+/* ── Reassign Panel ──────────────────────────────── */
+.opt-reassign {
+  background: #e8f0fe;
+  border: none;
+  border-bottom: 1px solid #d2e3fc;
+  border-radius: 0;
+  padding: 14px 20px;
 }
 
+.opt-reassign-title {
+  font-weight: 700;
+  font-size: 0.8125rem;
+  margin-bottom: 6px;
+  color: #202124;
+}
+
+.opt-reassign p {
+  font-size: 0.8125rem;
+  color: #5f6368;
+  margin-bottom: 10px;
+}
+
+.opt-reassign select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #d2e3fc;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  font-size: 0.8125rem;
+}
+
+.opt-reassign-cancel {
+  background: transparent;
+  border: none;
+  color: #c5221f;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ── Spinner ─────────────────────────────────────── */
 .animate-spin {
   display: inline-block;
-  animation: spin 1s linear infinite;
+  animation: opt-spin 1s linear infinite;
 }
 
-@keyframes spin {
+@keyframes opt-spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
 
-/* ── Algorithm Config Info Box ─────────────────────── */
-.config-info-box {
-  margin-top: 12px;
-  padding: 12px;
-  background: #f8fafc;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
+/* ══════════════════════════════════════════════════
+   GOOGLE MAPS-STYLE MAP OVERLAYS
+   ══════════════════════════════════════════════════ */
+
+/* ── Map Legend Panel (Google Maps Places-style) ── */
+.opt-map-legend {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+  background: white;
+  border-radius: 8px;
+  padding: 12px 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  min-width: 170px;
+  border: none;
 }
 
-.config-info-row {
+.opt-legend-title {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #5f6368;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #e8eaed;
+}
+
+.opt-legend-item {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-bottom: 8px;
+  gap: 8px;
+  padding: 6px 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-bottom: 2px;
 }
 
-.config-solver-name {
+.opt-legend-item:hover { background: #f1f3f4; }
+.opt-legend-item.active { background: #e8f0fe; }
+
+.opt-legend-color {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.opt-legend-label {
   font-size: 0.8125rem;
-  font-weight: 700;
-  color: var(--primary, #2563eb);
+  font-weight: 500;
+  color: #202124;
+  flex: 1;
 }
 
-.config-ga-params {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4px 12px;
+.opt-legend-stops {
+  font-size: 0.6875rem;
+  color: #9aa0a6;
+  font-weight: 500;
 }
 
-.param-item {
+.opt-legend-reset {
+  width: 100%;
+  margin-top: 6px;
+  padding: 6px;
+  border: none;
+  border-radius: 6px;
+  background: #e8f0fe;
+  color: #1a73e8;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.opt-legend-reset:hover { background: #d2e3fc; }
+
+/* ── Map Stats Overlay (Google Maps bottom bar) ─── */
+.opt-map-stats {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
   display: flex;
-  justify-content: space-between;
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  padding: 2px 0;
+  gap: 0;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
 }
 
-.param-item strong {
-  color: var(--text-main);
+.opt-mstat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 20px;
+  border-right: 1px solid #e8eaed;
+}
+
+.opt-mstat:last-child {
+  border-right: none;
+}
+
+.opt-mstat strong {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #202124;
+  font-family: 'Google Sans', 'Manrope', sans-serif;
+  line-height: 1.2;
+}
+
+.opt-mstat span {
+  font-size: 0.625rem;
+  color: #5f6368;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ── Google Maps Map Type Control ──────────────── */
+.gmap-type-control {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 1000;
+  display: flex;
+  gap: 0;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+
+.gmap-type-btn {
+  padding: 8px 14px;
+  border: none;
+  background: white;
+  color: #5f6368;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  border-right: 1px solid #e8eaed;
+  font-family: 'Google Sans', 'Inter', sans-serif;
+}
+
+.gmap-type-btn:last-child {
+  border-right: none;
+}
+
+.gmap-type-btn:hover {
+  background: #f1f3f4;
+}
+
+.gmap-type-btn.active {
+  color: #1a73e8;
+  font-weight: 600;
+  background: #e8f0fe;
+}
+
+/* ── Google Maps Zoom Control Override ──────────── */
+.opt-map .leaflet-control-zoom {
+  border: none !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3) !important;
+  border-radius: 8px !important;
+  overflow: hidden;
+  margin-right: 10px !important;
+  margin-bottom: 10px !important;
+}
+
+.opt-map .leaflet-control-zoom a {
+  width: 40px !important;
+  height: 40px !important;
+  line-height: 40px !important;
+  font-size: 18px !important;
+  color: #5f6368 !important;
+  background: white !important;
+  border-bottom: 1px solid #e8eaed !important;
+  transition: background 0.15s !important;
+}
+
+.opt-map .leaflet-control-zoom a:hover {
+  background: #f1f3f4 !important;
+  color: #202124 !important;
+}
+
+.opt-map .leaflet-control-zoom-out {
+  border-bottom: none !important;
+}
+
+/* ── Depot Pulse Animation ──────────────────────── */
+.depot-marker-wrap {
+  position: relative;
+  width: 40px;
+  height: 40px;
+}
+
+.depot-pulse {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(234, 67, 53, 0.25);
+  animation: depot-ring 2s ease-out infinite;
+  z-index: 1;
+}
+
+@keyframes depot-ring {
+  0% { transform: translateX(-50%) scale(0.8); opacity: 1; }
+  100% { transform: translateX(-50%) scale(2.2); opacity: 0; }
+}
+
+/* ── Google Maps Popup/Tooltip Overrides ──────── */
+.opt-map .leaflet-popup-content-wrapper {
+  border-radius: 8px;
+  box-shadow: 0 2px 7px 1px rgba(0,0,0,0.3);
+  font-family: 'Google Sans', 'Inter', sans-serif;
+  padding: 0;
+}
+
+.opt-map .leaflet-popup-content {
+  margin: 12px 16px;
+  line-height: 1.5;
+}
+
+.opt-map .leaflet-popup-tip {
+  box-shadow: none;
+}
+
+.opt-map .leaflet-tooltip {
+  font-family: 'Google Sans', 'Inter', sans-serif;
+  border-radius: 4px;
+  padding: 6px 10px;
+  box-shadow: 0 2px 7px 1px rgba(0,0,0,0.3);
+  border: none;
+  background: white;
+  color: #202124;
+  font-size: 0.8125rem;
+}
+
+/* ── Focused Route Info Panel (Google Directions-style) ── */
+.gmap-route-info {
+  position: absolute;
+  bottom: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  min-width: 320px;
+  max-width: 500px;
+}
+
+.gmap-route-info-color {
+  width: 4px;
+  height: 48px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.gmap-route-info-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.gmap-route-info-vehicle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #202124;
+  margin: 0 0 2px;
+  font-family: 'Google Sans', 'Manrope', sans-serif;
+}
+
+.gmap-route-info-detail {
+  font-size: 0.8125rem;
+  color: #5f6368;
+  margin: 0;
+}
+
+.gmap-route-info-detail strong {
+  color: #1a73e8;
   font-weight: 600;
 }
 
-.config-description {
-  margin-top: 8px;
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  font-style: italic;
-  line-height: 1.4;
+.gmap-route-info-stats {
+  display: flex;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.gmap-route-info-stat {
+  text-align: center;
+}
+
+.gmap-route-info-stat-value {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #202124;
+  font-family: 'Google Sans', 'Manrope', sans-serif;
+  display: block;
+  line-height: 1.2;
+}
+
+.gmap-route-info-stat-label {
+  font-size: 0.625rem;
+  color: #9aa0a6;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+}
+
+.gmap-route-info-close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: #5f6368;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.gmap-route-info-close:hover {
+  background: #f1f3f4;
+}
+
+/* ── Google Maps-style Direction Arrow Markers ─── */
+.gmap-arrow-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* ── Google Maps Start/End Markers ────────────── */
+.gmap-start-marker {
+  position: relative;
+}
+
+.gmap-start-marker .gmap-label {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 4px;
+  background: white;
+  padding: 3px 8px;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #202124;
+  white-space: nowrap;
+}
+
+/* ── Traffic / Road Details Overlay ──────────── */
+.gmap-traffic-legend {
+  position: absolute;
+  bottom: 24px;
+  right: 10px;
+  z-index: 1000;
+  background: white;
+  border-radius: 8px;
+  padding: 8px 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.6875rem;
+  color: #5f6368;
+}
+
+.gmap-traffic-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+/* ── Google Maps A/B Marker Styles ────────────── */
+.gmap-ab-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Google Sans', 'Inter', sans-serif;
+}
+
+/* ── Route step connector line in side panel ──── */
+.gmap-step-connector {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  padding: 0 20px;
+}
+
+.gmap-step-line {
+  width: 2px;
+  background: #dadce0;
+  position: relative;
+  flex-shrink: 0;
+  margin-left: 9px;
+}
+
+.gmap-step-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #5f6368;
+  position: absolute;
+  left: -3px;
+}
+
+/* ── Smooth Polyline Animation (flowing dashes) ── */
+@keyframes gmap-dash-flow {
+  from { stroke-dashoffset: 24; }
+  to { stroke-dashoffset: 0; }
+}
+
+.leaflet-overlay-pane svg path.gmap-animated-path {
+  animation: gmap-dash-flow 0.8s linear infinite;
+}
+
+/* ── Google Maps "My Location" button ─────────── */
+.gmap-my-location {
+  position: absolute;
+  bottom: 100px;
+  right: 10px;
+  z-index: 1000;
+  width: 40px;
+  height: 40px;
+  background: white;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  color: #5f6368;
+}
+
+.gmap-my-location:hover {
+  background: #f1f3f4;
+  color: #202124;
+}
+
+/* ── Google Maps Fullscreen Button ─────────────── */
+.gmap-fullscreen {
+  position: absolute;
+  top: 10px;
+  left: 200px;
+  z-index: 1000;
+  width: 40px;
+  height: 40px;
+  background: white;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  color: #5f6368;
+}
+
+.gmap-fullscreen:hover {
+  background: #f1f3f4;
+  color: #202124;
+}
+
+/* ── Google Maps Search Box (decorative) ──────── */
+.gmap-search-box {
+  position: absolute;
+  top: 60px;
+  left: 10px;
+  z-index: 1000;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 280px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+/* ── Leaflet Attribution Override ─────────────── */
+.opt-map .leaflet-control-attribution {
+  background: rgba(255,255,255,0.7) !important;
+  font-size: 10px !important;
+  padding: 2px 6px !important;
+  border-radius: 4px 0 0 0;
 }

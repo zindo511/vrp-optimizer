@@ -51,5 +51,6 @@ public class Route extends BaseEntity{
     private RouteStatus status = RouteStatus.PLANNED;
 
     @OneToMany(mappedBy = "route", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("stopOrder ASC")
     private List<RouteStop> routeStops;
 }

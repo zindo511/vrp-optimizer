@@ -49,12 +49,15 @@ public class ReportServiceImpl implements ReportService {
             totalOrders += count;
         }
 
-        // ── Tổng km & chi phí từ optimization_results ────────────────────────
-        List<OptimizationResult> allResults = optimizationResultRepository.findAll();
-        BigDecimal totalDistanceKm = allResults.stream()
-                .map(OptimizationResult::getTotalDistance)
+        // ── Tổng km từ bảng routes (chính xác hơn optimization_results) ────
+        BigDecimal totalDistanceKm = routeRepository.findAll().stream()
+                .map(r -> r.getTotalDistanceMeters())
                 .filter(Objects::nonNull)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .divide(BigDecimal.valueOf(1000), 2, java.math.RoundingMode.HALF_UP);
+
+        // ── Tổng chi phí từ optimization_results ─────────────────────────
+        List<OptimizationResult> allResults = optimizationResultRepository.findAll();
 
         BigDecimal totalCostVnd = allResults.stream()
                 .map(OptimizationResult::getTotalCost)

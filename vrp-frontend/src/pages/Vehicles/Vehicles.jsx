@@ -1,14 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Truck, Settings, X, Save, Edit2, Trash2 } from 'lucide-react';
+import { Plus, Search, X, Save, Edit3, Trash2, ChevronLeft, ChevronRight, Truck } from 'lucide-react';
 import api from '../../api/axios';
-import DataTable from '../../components/Common/DataTable';
+import './Vehicles.css';
 import { toast } from 'react-toastify';
+
+const STATUS_MAP = {
+  'AVAILABLE': { label: 'Sẵn sàng', cls: 'available' },
+  'IN_USE': { label: 'Đang sử dụng', cls: 'in-use' },
+  'MAINTENANCE': { label: 'Bảo trì', cls: 'maintenance' },
+};
+
+const getInitials = (name) => {
+  if (!name) return '?';
+  return name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+};
 
 const Vehicles = () => {
   const [vehicles, setVehicles] = useState([]);
   const [vehicleTypes, setVehicleTypes] = useState([]);
+  const [drivers, setDrivers] = useState([]);
   const [activeTab, setActiveTab] = useState('vehicles');
   const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('ALL');
   
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -18,12 +32,14 @@ const Vehicles = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [vRes, tRes] = await Promise.all([
+      const [vRes, tRes, dRes] = await Promise.all([
         api.get('/api/vehicles'),
-        api.get('/api/vehicle-types')
+        api.get('/api/vehicle-types'),
+        api.get('/api/drivers')
       ]);
       setVehicles(vRes.data.data.content || []);
       setVehicleTypes(tRes.data.data.content || []);
+      setDrivers(dRes.data.data.content || []);
     } catch (err) {
       console.error('Error fetching vehicle data:', err);
     } finally {
@@ -35,16 +51,34 @@ const Vehicles = () => {
     fetchData();
   }, []);
 
+  // Xây dựng map vehicleId -> driverName từ danh sách tài xế
+  // Map: vehicleId -> driver object
+  const vehicleDriverMap = {};
+  drivers.forEach(d => {
+    if (d.vehicleId) {
+      vehicleDriverMap[d.vehicleId] = { id: d.id, name: d.userFullName || d.userEmail || 'Tài xế' };
+    }
+  });
+
   const handleOpenModal = (item = null) => {
     setEditingItem(item);
     if (activeTab === 'vehicles') {
-      setFormData(item ? { 
-        licensePlate: item.licensePlate, 
-        vehicleTypeId: item.vehicleTypeId 
-      } : { 
-        licensePlate: '', 
-        vehicleTypeId: vehicleTypes.length > 0 ? vehicleTypes[0].id : '' 
-      });
+      if (item) {
+        const vtId = item.vehicleType?.id || '';
+        const currentDriver = vehicleDriverMap[item.id];
+        setFormData({ 
+          licensePlate: item.licensePlate, 
+          vehicleTypeId: vtId,
+          vehicleStatus: item.status || 'AVAILABLE',
+          driverId: currentDriver ? String(currentDriver.id) : ''
+        });
+      } else {
+        setFormData({ 
+          licensePlate: '', 
+          vehicleTypeId: vehicleTypes.length > 0 ? vehicleTypes[0].id : '',
+          driverId: ''
+        });
+      }
     } else {
       setFormData(item ? { ...item } : {
         name: '',
@@ -65,15 +99,41 @@ const Vehicles = () => {
     try {
       if (activeTab === 'vehicles') {
         if (editingItem) {
-          await api.put(`/api/vehicles/${editingItem.id}`, formData);
+          await api.patch(`/api/vehicles/${editingItem.id}`, {
+            licensePlate: formData.licensePlate,
+            vehicleTypeId: formData.vehicleTypeId ? Number(formData.vehicleTypeId) : null,
+            vehicleStatus: formData.vehicleStatus || null
+          });
+
+          // Xử lý gán/bỏ gán tài xế
+          const currentDriver = vehicleDriverMap[editingItem.id];
+          const newDriverId = formData.driverId ? Number(formData.driverId) : null;
+          const oldDriverId = currentDriver ? currentDriver.id : null;
+
+          // Bỏ gán tài xế cũ (nếu đổi sang tài xế khác hoặc bỏ gán)
+          if (oldDriverId && oldDriverId !== newDriverId) {
+            await api.patch(`/api/drivers/${oldDriverId}`, { vehicleId: 0 });
+          }
+          // Gán tài xế mới
+          if (newDriverId && newDriverId !== oldDriverId) {
+            await api.patch(`/api/drivers/${newDriverId}`, { vehicleId: editingItem.id });
+          }
+
           toast.success('Cập nhật xe thành công');
         } else {
-          await api.post('/api/vehicles', formData);
+          const res = await api.post('/api/vehicles', {
+            licensePlate: formData.licensePlate,
+            vehicleTypeId: formData.vehicleTypeId ? Number(formData.vehicleTypeId) : null
+          });
+          // Nếu tạo xe mới và chọn tài xế luôn
+          if (formData.driverId && res.data?.data?.id) {
+            await api.patch(`/api/drivers/${Number(formData.driverId)}`, { vehicleId: res.data.data.id });
+          }
           toast.success('Thêm xe mới thành công');
         }
       } else {
         if (editingItem) {
-          await api.put(`/api/vehicle-types/${editingItem.id}`, formData);
+          await api.patch(`/api/vehicle-types/${editingItem.id}`, formData);
           toast.success('Cập nhật loại xe thành công');
         } else {
           await api.post('/api/vehicle-types', formData);
@@ -89,7 +149,6 @@ const Vehicles = () => {
 
   const handleDelete = async (item) => {
     if (!window.confirm(`Bạn có chắc muốn xóa ${activeTab === 'vehicles' ? 'xe ' + item.licensePlate : 'loại xe ' + item.name}?`)) return;
-    
     try {
       if (activeTab === 'vehicles') {
         await api.delete(`/api/vehicles/${item.id}`);
@@ -104,92 +163,210 @@ const Vehicles = () => {
     }
   };
 
-  const vehicleColumns = [
-    { header: 'Biển số', accessor: 'licensePlate' },
-    { header: 'Loại xe', accessor: 'vehicleTypeName' },
-    { 
-      header: 'Trạng thái', 
-      accessor: 'status',
-      render: (val) => (
-        <span className={`status-badge ${val === 'AVAILABLE' ? 'active' : 'warning'}`}>
-          {val === 'AVAILABLE' ? 'Sẵn sàng' : val}
-        </span>
-      )
-    },
-    { header: 'Tài xế hiện tại', accessor: 'currentDriverName' }
-  ];
-
-  const typeColumns = [
-    { header: 'Tên loại xe', accessor: 'name' },
-    { header: 'Tải trọng (kg)', accessor: 'maxWeightKg' },
-    { header: 'Thể tích (m³)', accessor: 'maxVolumeM3' },
-    { header: 'Tốc độ (km/h)', accessor: 'averageSpeedKmh' }
-  ];
+  // Filter vehicles
+  const filteredVehicles = vehicles.filter(v => {
+    const matchSearch = (v.licensePlate || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        (v.vehicleType?.name || '').toLowerCase().includes(searchTerm.toLowerCase());
+    const matchStatus = statusFilter === 'ALL' || v.status === statusFilter;
+    return matchSearch && matchStatus;
+  });
 
   return (
-    <div className="vehicles-page">
-      <div className="page-header">
-        <div className="page-title">
-          <h2>Quản lý Phương tiện</h2>
-          <p>Quản lý đội xe và phân loại tải trọng</p>
+    <div className="veh-page">
+      {/* ══ Page Header ═══════════════════════════════════ */}
+      <div className="veh-header">
+        <div className="veh-header-title">
+          <h2>Quản lý Đội xe</h2>
+          <p>Quản lý thông tin phương tiện, trọng tải và trạng thái vận hành.</p>
         </div>
-        <div className="flex gap-4">
-          <button className="btn-primary" onClick={() => handleOpenModal()}>
-            <Plus size={20} /> Thêm {activeTab === 'vehicles' ? 'xe' : 'loại xe'}
-          </button>
-        </div>
+        <button className="veh-btn-add" onClick={() => handleOpenModal()}>
+          <Plus size={16} /> Thêm {activeTab === 'vehicles' ? 'xe mới' : 'loại xe'}
+        </button>
       </div>
 
-      <div className="tabs-container" style={{ marginBottom: '32px', display: 'flex', gap: '16px', borderBottom: '1px solid var(--border-color)' }}>
-        <button 
-          className={`tab-btn ${activeTab === 'vehicles' ? 'active' : ''}`}
-          style={{ 
-            paddingBottom: '16px', 
-            paddingLeft: '8px', 
-            paddingRight: '8px', 
-            fontWeight: '600', 
-            background: 'transparent',
-            color: activeTab === 'vehicles' ? 'var(--primary)' : 'var(--text-muted)',
-            borderBottom: activeTab === 'vehicles' ? '2px solid var(--primary)' : 'none'
-          }}
-          onClick={() => setActiveTab('vehicles')}
-        >
+      {/* ══ Tabs ══════════════════════════════════════════ */}
+      <div className="veh-tabs">
+        <button className={`veh-tab ${activeTab === 'vehicles' ? 'active' : ''}`} onClick={() => setActiveTab('vehicles')}>
           Danh sách xe
         </button>
-        <button 
-          className={`tab-btn ${activeTab === 'types' ? 'active' : ''}`}
-          style={{ 
-            paddingBottom: '16px', 
-            paddingLeft: '8px', 
-            paddingRight: '8px', 
-            fontWeight: '600', 
-            background: 'transparent',
-            color: activeTab === 'types' ? 'var(--primary)' : 'var(--text-muted)',
-            borderBottom: activeTab === 'types' ? '2px solid var(--primary)' : 'none'
-          }}
-          onClick={() => setActiveTab('types')}
-        >
+        <button className={`veh-tab ${activeTab === 'types' ? 'active' : ''}`} onClick={() => setActiveTab('types')}>
           Phân loại xe
         </button>
       </div>
 
       {activeTab === 'vehicles' ? (
-        <DataTable columns={vehicleColumns} data={vehicles} loading={loading} onEdit={handleOpenModal} onDelete={handleDelete} />
+        <>
+          {/* ══ Toolbar ═══════════════════════════════════ */}
+          <div className="veh-toolbar">
+            <div className="veh-search">
+              <Search size={16} />
+              <input 
+                type="text" 
+                placeholder="Tìm kiếm biển số hoặc loại xe..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <div className="veh-filter-pills">
+              {[
+                { key: 'ALL', label: 'Tất cả', cls: 'all' },
+                { key: 'IN_USE', label: 'Đang sử dụng', cls: 'in-use' },
+                { key: 'AVAILABLE', label: 'Sẵn sàng', cls: 'available' },
+                { key: 'MAINTENANCE', label: 'Bảo trì', cls: 'maintenance' },
+              ].map(f => (
+                <button 
+                  key={f.key}
+                  className={`veh-pill ${f.cls} ${statusFilter === f.key ? 'active' : ''}`}
+                  onClick={() => setStatusFilter(f.key)}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* ══ Data Table ════════════════════════════════ */}
+          <div className="veh-table-card">
+            <div style={{ overflowX: 'auto' }}>
+              <table className="veh-table">
+                <thead>
+                  <tr>
+                    <th>Biển số</th>
+                    <th>Loại xe</th>
+                    <th>Trọng tải (kg)</th>
+                    <th>Trạng thái</th>
+                    <th>Tài xế hiện tại</th>
+                    <th style={{ textAlign: 'right' }}>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loading ? (
+                    <tr><td colSpan={6} style={{ textAlign: 'center', padding: '40px', color: '#76777d' }}>Đang tải...</td></tr>
+                  ) : filteredVehicles.length === 0 ? (
+                    <tr><td colSpan={6}>
+                      <div className="veh-empty">
+                        <Truck size={40} strokeWidth={1.5} />
+                        <p>Không tìm thấy xe nào.</p>
+                      </div>
+                    </td></tr>
+                  ) : (
+                    filteredVehicles.map(v => {
+                      const st = STATUS_MAP[v.status] || { label: v.status || 'N/A', cls: 'available' };
+                      const driverName = vehicleDriverMap[v.id] || null;
+                      return (
+                        <tr key={v.id}>
+                          <td><span className="veh-plate">{v.licensePlate}</span></td>
+                          <td>{v.vehicleType?.name || '—'}</td>
+                          <td style={{ fontFamily: 'Inter, monospace', fontSize: '0.75rem', color: '#45464d' }}>
+                            {v.vehicleType?.maxWeightKg ? v.vehicleType.maxWeightKg.toLocaleString() : '—'}
+                          </td>
+                          <td>
+                            <span className={`veh-status ${st.cls}`}>
+                              <span className="dot"></span>
+                              {st.label}
+                            </span>
+                          </td>
+                          <td>
+                            {driverName ? (
+                              <div className="veh-driver">
+                                <div className="veh-driver-avatar">{getInitials(driverName.name)}</div>
+                                <span>{driverName.name}</span>
+                              </div>
+                            ) : (
+                              <span className="veh-driver-none">Không có</span>
+                            )}
+                          </td>
+                          <td>
+                            <div className="veh-actions">
+                              <button className="veh-action-btn edit" onClick={() => handleOpenModal(v)}>
+                                <Edit3 size={16} />
+                              </button>
+                              <button className="veh-action-btn delete" onClick={() => handleDelete(v)}>
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+            {/* Pagination */}
+            <div className="veh-pagination">
+              <span className="veh-pag-info">Tổng số: {filteredVehicles.length} xe</span>
+              <div className="veh-pag-btns">
+                <button className="veh-pag-btn" disabled><ChevronLeft size={16} /></button>
+                <button className="veh-pag-btn active">1</button>
+                <button className="veh-pag-btn"><ChevronRight size={16} /></button>
+              </div>
+            </div>
+          </div>
+        </>
       ) : (
-        <DataTable columns={typeColumns} data={vehicleTypes} loading={loading} onEdit={handleOpenModal} onDelete={handleDelete} />
+        /* ══ Vehicle Types Table ═════════════════════════ */
+        <div className="veh-table-card">
+          <div style={{ overflowX: 'auto' }}>
+            <table className="veh-table">
+              <thead>
+                <tr>
+                  <th>Tên loại xe</th>
+                  <th>Tải trọng (kg)</th>
+                  <th>Thể tích (m³)</th>
+                  <th>Tốc độ TB (km/h)</th>
+                  <th>Thời gian lái tối đa</th>
+                  <th style={{ textAlign: 'right' }}>Thao tác</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr><td colSpan={6} style={{ textAlign: 'center', padding: '40px', color: '#76777d' }}>Đang tải...</td></tr>
+                ) : vehicleTypes.length === 0 ? (
+                  <tr><td colSpan={6}>
+                    <div className="veh-empty"><p>Chưa có loại xe nào.</p></div>
+                  </td></tr>
+                ) : (
+                  vehicleTypes.map(t => (
+                    <tr key={t.id}>
+                      <td style={{ fontWeight: 600 }}>{t.name}</td>
+                      <td style={{ fontFamily: 'Inter, monospace', fontSize: '0.75rem', color: '#45464d' }}>{t.maxWeightKg?.toLocaleString()}</td>
+                      <td style={{ fontFamily: 'Inter, monospace', fontSize: '0.75rem', color: '#45464d' }}>{t.maxVolumeM3}</td>
+                      <td style={{ fontFamily: 'Inter, monospace', fontSize: '0.75rem', color: '#45464d' }}>{t.averageSpeedKmh}</td>
+                      <td style={{ fontFamily: 'Inter, monospace', fontSize: '0.75rem', color: '#45464d' }}>{t.maxDrivingTimeMinutes} phút</td>
+                      <td>
+                        <div className="veh-actions" style={{ opacity: 1 }}>
+                          <button className="veh-action-btn edit" onClick={() => handleOpenModal(t)}>
+                            <Edit3 size={16} />
+                          </button>
+                          <button className="veh-action-btn delete" onClick={() => handleDelete(t)}>
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       )}
 
+      {/* ══ Modal ═════════════════════════════════════════ */}
       {isModalOpen && (
-        <div className="modal-overlay">
-          <div className="card" style={{ width: '100%', maxWidth: '500px' }}>
-            <div className="modal-header">
+        <div className="veh-modal-overlay" onClick={() => setIsModalOpen(false)}>
+          <div className="veh-modal" onClick={e => e.stopPropagation()}>
+            <div className="veh-modal-header">
               <h3>{editingItem ? 'Cập nhật' : 'Thêm mới'} {activeTab === 'vehicles' ? 'xe' : 'loại xe'}</h3>
-              <button onClick={() => setIsModalOpen(false)}><X size={20} /></button>
+              <button className="veh-modal-close" onClick={() => setIsModalOpen(false)}>
+                <X size={18} />
+              </button>
             </div>
             <form onSubmit={handleSubmit}>
               {activeTab === 'vehicles' ? (
                 <>
-                  <div className="input-group">
+                  <div className="veh-form-field">
                     <label>Biển số xe</label>
                     <input 
                       type="text" 
@@ -199,17 +376,9 @@ const Vehicles = () => {
                       placeholder="VD: 29C-123.45"
                     />
                   </div>
-                  <div className="input-group">
+                  <div className="veh-form-field">
                     <label>Loại xe</label>
                     <select 
-                      style={{ 
-                        width: '100%', 
-                        padding: '10px', 
-                        borderRadius: 'var(--radius-sm)', 
-                        border: '1px solid var(--border-color)',
-                        background: 'white',
-                        fontSize: '0.8125rem'
-                      }}
                       required
                       value={formData.vehicleTypeId || ''}
                       onChange={e => setFormData({...formData, vehicleTypeId: e.target.value})}
@@ -220,10 +389,41 @@ const Vehicles = () => {
                       ))}
                     </select>
                   </div>
+                  {editingItem && (
+                    <div className="veh-form-field">
+                      <label>Trạng thái</label>
+                      <select 
+                        value={formData.vehicleStatus || 'AVAILABLE'}
+                        onChange={e => setFormData({...formData, vehicleStatus: e.target.value})}
+                      >
+                        <option value="AVAILABLE">Sẵn sàng</option>
+                        <option value="IN_USE">Đang sử dụng</option>
+                        <option value="MAINTENANCE">Bảo trì</option>
+                      </select>
+                    </div>
+                  )}
+                  <div className="veh-form-field">
+                    <label>Gán tài xế</label>
+                    <select 
+                      value={formData.driverId || ''}
+                      onChange={e => setFormData({...formData, driverId: e.target.value})}
+                    >
+                      <option value="">-- Không gán tài xế --</option>
+                      {drivers.map(d => {
+                        // Tài xế đã gán cho xe khác (disable)
+                        const isAssigned = d.vehicleId && d.vehicleId !== (editingItem?.id);
+                        return (
+                          <option key={d.id} value={d.id} disabled={isAssigned}>
+                            {d.userFullName || d.userEmail}{isAssigned ? ` — đã gán cho ${d.vehicleLicensePlate}` : ''}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </div>
                 </>
               ) : (
                 <>
-                  <div className="input-group">
+                  <div className="veh-form-field">
                     <label>Tên loại xe</label>
                     <input 
                       type="text" 
@@ -233,52 +433,32 @@ const Vehicles = () => {
                       placeholder="VD: Xe tải 2.5 tấn"
                     />
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                    <div className="input-group">
+                  <div className="veh-form-grid">
+                    <div className="veh-form-field">
                       <label>Tải trọng (kg)</label>
-                      <input 
-                        type="number" 
-                        required 
-                        value={formData.maxWeightKg || ''} 
-                        onChange={e => setFormData({...formData, maxWeightKg: e.target.value})}
-                      />
+                      <input type="number" required value={formData.maxWeightKg || ''} onChange={e => setFormData({...formData, maxWeightKg: e.target.value})} />
                     </div>
-                    <div className="input-group">
+                    <div className="veh-form-field">
                       <label>Thể tích (m³)</label>
-                      <input 
-                        type="number" 
-                        required 
-                        value={formData.maxVolumeM3 || ''} 
-                        onChange={e => setFormData({...formData, maxVolumeM3: e.target.value})}
-                      />
+                      <input type="number" required value={formData.maxVolumeM3 || ''} onChange={e => setFormData({...formData, maxVolumeM3: e.target.value})} />
                     </div>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                    <div className="input-group">
-                      <label>Tốc độ trung bình (km/h)</label>
-                      <input 
-                        type="number" 
-                        required 
-                        value={formData.averageSpeedKmh || ''} 
-                        onChange={e => setFormData({...formData, averageSpeedKmh: e.target.value})}
-                      />
+                  <div className="veh-form-grid">
+                    <div className="veh-form-field">
+                      <label>Tốc độ TB (km/h)</label>
+                      <input type="number" required value={formData.averageSpeedKmh || ''} onChange={e => setFormData({...formData, averageSpeedKmh: e.target.value})} />
                     </div>
-                    <div className="input-group">
-                      <label>Thời gian lái tối đa (phút)</label>
-                      <input 
-                        type="number" 
-                        required 
-                        value={formData.maxDrivingTimeMinutes || ''} 
-                        onChange={e => setFormData({...formData, maxDrivingTimeMinutes: e.target.value})}
-                      />
+                    <div className="veh-form-field">
+                      <label>TG lái tối đa (phút)</label>
+                      <input type="number" required value={formData.maxDrivingTimeMinutes || ''} onChange={e => setFormData({...formData, maxDrivingTimeMinutes: e.target.value})} />
                     </div>
                   </div>
                 </>
               )}
-              <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-                <button type="button" className="btn-secondary" onClick={() => setIsModalOpen(false)}>Hủy</button>
-                <button type="submit" className="btn-primary">
-                  <Save size={18} /> Lưu thông tin
+              <div className="veh-form-actions">
+                <button type="button" className="veh-form-cancel" onClick={() => setIsModalOpen(false)}>Hủy</button>
+                <button type="submit" className="veh-form-save">
+                  <Save size={15} /> Lưu thông tin
                 </button>
               </div>
             </form>

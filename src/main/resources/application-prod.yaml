@@ -23,6 +23,17 @@ springdoc:
   api-docs:
     enabled: false
 
+# Actuator: chỉ expose health (cho Docker healthcheck) trên prod
+# Metrics và info bị ẩn để bảo mật
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never   # không leak chi tiết trên prod
+
 logging:
   level:
     vn.ttcs.vrp: INFO

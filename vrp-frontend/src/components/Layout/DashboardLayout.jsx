@@ -1,5 +1,6 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
+import { Bell, HelpCircle, UserCircle } from 'lucide-react';
 import Sidebar from './Sidebar';
 import './DashboardLayout.css';
 
@@ -9,15 +10,19 @@ const DashboardLayout = () => {
       <Sidebar />
       <main className="dashboard-main">
         <header className="dashboard-header">
-          <div className="header-search">
-            {/* Search bar placeholder */}
+          <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+            <span className="header-brand">VRP Logistics</span>
           </div>
           <div className="header-profile">
-            <div className="profile-info">
-              <span className="profile-name">Admin User</span>
-              <span className="profile-role">Administrator</span>
-            </div>
-            <div className="profile-avatar">A</div>
+            <button className="header-icon-btn" title="Thông báo">
+              <Bell size={20} />
+            </button>
+            <button className="header-icon-btn" title="Trợ giúp">
+              <HelpCircle size={20} />
+            </button>
+            <button className="header-icon-btn" title="Tài khoản">
+              <UserCircle size={20} />
+            </button>
           </div>
         </header>
         <div className="dashboard-content">

@@ -8,17 +8,16 @@ import {
   Users, 
   ShoppingCart, 
   BarChart3,
-  Settings,
   LogOut
 } from 'lucide-react';
 import './Sidebar.css';
 
 const Sidebar = () => {
   const menuItems = [
-    { icon: <LayoutDashboard size={20} />, label: 'Điều hành lộ trình', path: '/admin/dashboard' },
-    { icon: <MapPin size={20} />, label: 'Địa điểm', path: '/admin/locations' },
+    { icon: <LayoutDashboard size={20} />, label: 'Bảng điều khiển', path: '/admin/dashboard' },
+    { icon: <MapPin size={20} />, label: 'Quản lý Địa điểm', path: '/admin/locations' },
     { icon: <Warehouse size={20} />, label: 'Kho bãi', path: '/admin/depots' },
-    { icon: <Truck size={20} />, label: 'Phương tiện', path: '/admin/vehicles' },
+    { icon: <Truck size={20} />, label: 'Đội xe', path: '/admin/vehicles' },
     { icon: <Users size={20} />, label: 'Tài xế', path: '/admin/drivers' },
     { icon: <ShoppingCart size={20} />, label: 'Đơn hàng', path: '/admin/orders' },
     { icon: <BarChart3 size={20} />, label: 'Báo cáo', path: '/admin/reports' },
@@ -32,8 +31,8 @@ const Sidebar = () => {
   return (
     <aside className="sidebar">
       <div className="sidebar-logo">
-        <div className="logo-icon">V</div>
-        <span>VRP Optimizer</span>
+        <span>VRP System</span>
+        <span className="sidebar-logo-sub">Quản trị Logistics</span>
       </div>
 
       <nav className="sidebar-nav">

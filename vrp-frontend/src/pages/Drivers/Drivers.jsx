@@ -1,14 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Users, Phone, ShieldCheck, X, Save, Edit2, Trash2, Truck } from 'lucide-react';
+import { Plus, Search, Phone, UserPlus, X, Save, Edit3, Trash2, Truck, ChevronLeft, ChevronRight } from 'lucide-react';
 import api from '../../api/axios';
-import DataTable from '../../components/Common/DataTable';
+import './Drivers.css';
 import { toast } from 'react-toastify';
+
+const STATUS_MAP = {
+  'ACTIVE': { label: 'Hoạt động', cls: 'active' },
+  'INACTIVE': { label: 'Ngừng việc', cls: 'inactive' }
+};
+
+const getInitials = (name) => {
+  if (!name) return '?';
+  return name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+};
 
 const Drivers = () => {
   const [drivers, setDrivers] = useState([]);
   const [users, setUsers] = useState([]);
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('ALL');
   
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -46,8 +58,8 @@ const Drivers = () => {
     setEditingItem(item);
     if (item) {
       setFormData({
-        licenseNumber: item.licenseNumber,
-        phone: item.phone,
+        licenseNumber: item.licenseNumber || '',
+        phone: item.phone || '',
         vehicleId: item.vehicleId || ''
       });
     } else {
@@ -81,7 +93,7 @@ const Drivers = () => {
   };
 
   const handleDelete = async (item) => {
-    if (!window.confirm(`Bạn có chắc muốn xóa tài xế ${item.userEmail}?`)) return;
+    if (!window.confirm(`Bạn có chắc muốn xóa tài xế ${item.userFullName || item.userEmail}?`)) return;
     try {
       await api.delete(`/api/drivers/${item.id}`);
       toast.success('Xóa tài xế thành công');
@@ -91,117 +103,185 @@ const Drivers = () => {
     }
   };
 
-  const columns = [
-    { 
-      header: 'Tên tài xế', 
-      accessor: 'userEmail',
-      render: (val, row) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ 
-            width: '32px', 
-            height: '32px', 
-            borderRadius: '50%', 
-            background: '#f1f5f9', 
-            border: '1px solid var(--border-color)',
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            fontSize: '0.75rem', 
-            fontWeight: '700',
-            color: 'var(--primary)'
-          }}>
-            {val ? val.charAt(0).toUpperCase() : '?'}
-          </div>
-          <div>
-            <div style={{ fontWeight: 600 }}>{row.userFullName || val}</div>
-            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{val}</div>
-          </div>
-        </div>
-      )
-    },
-    { 
-      header: 'Bằng lái', 
-      accessor: 'licenseNumber'
-    },
-    { 
-      header: 'Số điện thoại', 
-      accessor: 'phone',
-      render: (val) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)' }}>
-          <Phone size={14} />
-          {val}
-        </div>
-      )
-    },
-    { 
-      header: 'Trạng thái', 
-      accessor: 'status',
-      render: (val) => (
-        <span className={`status-badge ${val === 'ACTIVE' ? 'active' : val === 'INACTIVE' ? 'info' : 'warning'}`}>
-          {val === 'ACTIVE' ? 'Hoạt động' : val === 'INACTIVE' ? 'Ngừng' : val}
-        </span>
-      )
-    },
-    { 
-      header: 'Xe được gán', 
-      accessor: 'vehicleLicensePlate',
-      render: (val) => val ? (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <Truck size={14} style={{ color: 'var(--primary)' }} />
-          <span style={{ fontWeight: 600 }}>{val}</span>
-        </div>
-      ) : (
-        <span style={{ color: '#cbd5e1', fontSize: '0.8rem' }}>Chưa gán xe</span>
-      )
-    }
-  ];
+  // Filter logic
+  const filteredDrivers = drivers.filter(d => {
+    const searchString = `${d.userFullName || ''} ${d.userEmail || ''} ${d.licenseNumber || ''} ${d.phone || ''} ${d.vehicleLicensePlate || ''}`.toLowerCase();
+    const matchSearch = searchString.includes(searchTerm.toLowerCase());
+    const matchStatus = statusFilter === 'ALL' || d.status === statusFilter;
+    return matchSearch && matchStatus;
+  });
 
   return (
-    <div className="drivers-page">
-      <div className="page-header">
-        <div className="page-title">
+    <div className="drv-page">
+      {/* ══ Page Header ═══════════════════════════════════ */}
+      <div className="drv-header">
+        <div className="drv-header-title">
           <h2>Quản lý Tài xế</h2>
           <p>Danh sách đội ngũ vận hành và trạng thái làm việc</p>
         </div>
-        <button className="btn-primary" onClick={() => handleOpenModal()}>
-          <Plus size={20} /> Thêm tài xế
+        <button className="drv-btn-add" onClick={() => handleOpenModal()}>
+          <UserPlus size={16} /> Thêm tài xế mới
         </button>
       </div>
 
-      <DataTable columns={columns} data={drivers} loading={loading} onEdit={handleOpenModal} onDelete={handleDelete} />
+      {/* ══ Toolbar ═══════════════════════════════════════ */}
+      <div className="drv-toolbar">
+        <div className="drv-filter-pills">
+          <button 
+            className={`drv-pill ${statusFilter === 'ALL' ? 'all active' : 'inactive-pill'}`}
+            onClick={() => setStatusFilter('ALL')}
+          >
+            Tất cả
+          </button>
+          <button 
+            className={`drv-pill ${statusFilter === 'ACTIVE' ? 'active-pill active' : 'inactive-pill'}`}
+            onClick={() => setStatusFilter('ACTIVE')}
+          >
+            Đang hoạt động
+          </button>
+          <button 
+            className={`drv-pill inactive-pill`}
+            onClick={() => toast.info('Chức năng đang phát triển')}
+          >
+            Nghỉ phép
+          </button>
+          <button 
+            className={`drv-pill ${statusFilter === 'INACTIVE' ? 'active-pill active' : 'inactive-pill'}`}
+            onClick={() => setStatusFilter('INACTIVE')}
+          >
+            Đã khóa
+          </button>
+        </div>
+        <div className="drv-search">
+          <Search size={16} />
+          <input 
+            type="text" 
+            placeholder="Tìm tên, SĐT, bằng lái..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </div>
 
+      {/* ══ Data Table ════════════════════════════════════ */}
+      <div className="drv-table-card">
+        <div style={{ overflowX: 'auto' }}>
+          <table className="drv-table">
+            <thead>
+              <tr>
+                <th>Họ tên & Ảnh</th>
+                <th>Số bằng lái</th>
+                <th>Số điện thoại</th>
+                <th>Trạng thái</th>
+                <th>Xe được gán</th>
+                <th style={{ textAlign: 'right' }}>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr><td colSpan={6} style={{ textAlign: 'center', padding: '40px', color: '#76777d' }}>Đang tải...</td></tr>
+              ) : filteredDrivers.length === 0 ? (
+                <tr><td colSpan={6}>
+                  <div className="drv-empty">
+                    <UserPlus size={40} strokeWidth={1.5} />
+                    <p>Không tìm thấy tài xế nào.</p>
+                  </div>
+                </td></tr>
+              ) : (
+                filteredDrivers.map(d => {
+                  const st = STATUS_MAP[d.status] || { label: d.status || 'N/A', cls: 'inactive' };
+                  return (
+                    <tr key={d.id}>
+                      <td>
+                        <div className="drv-identity">
+                          {d.avatarUrl ? (
+                            <img src={d.avatarUrl} alt={d.userFullName} className="drv-avatar" />
+                          ) : (
+                            <div className="drv-avatar-placeholder">{getInitials(d.userFullName || d.userEmail)}</div>
+                          )}
+                          <div>
+                            <div className="drv-name">{d.userFullName || d.userEmail || 'Chưa cập nhật'}</div>
+                            <div className="drv-id">ID: TX-{10000 + d.id}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td style={{ fontFamily: 'Inter, monospace', color: '#45464d' }}>{d.licenseNumber || '—'}</td>
+                      <td style={{ fontFamily: 'Inter, monospace', color: '#45464d' }}>{d.phone || '—'}</td>
+                      <td>
+                        <span className={`drv-status ${st.cls}`}>
+                          <span className="dot"></span>
+                          {st.label}
+                        </span>
+                      </td>
+                      <td>
+                        {d.vehicleLicensePlate ? (
+                          <div className="drv-vehicle">
+                            <Truck size={16} />
+                            <span className="drv-vehicle-plate">{d.vehicleLicensePlate}</span>
+                          </div>
+                        ) : (
+                          <span className="drv-vehicle-none">Chưa gán xe</span>
+                        )}
+                      </td>
+                      <td>
+                        <div className="drv-actions">
+                          <button className="drv-action-btn edit" onClick={() => handleOpenModal(d)} title="Sửa">
+                            <Edit3 size={18} />
+                          </button>
+                          <button className="drv-action-btn delete" onClick={() => handleDelete(d)} title="Xóa">
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+        
+        {/* Pagination */}
+        <div className="drv-pagination">
+          <span className="drv-pag-info">
+            {filteredDrivers.length === 0 ? 'Không có tài xế' : `Tổng số: ${filteredDrivers.length} tài xế`}
+          </span>
+          <div className="drv-pag-btns">
+            <button className="drv-pag-btn nav" disabled><ChevronLeft size={16} /></button>
+            <button className="drv-pag-btn active">1</button>
+            <button className="drv-pag-btn nav"><ChevronRight size={16} /></button>
+          </div>
+        </div>
+      </div>
+
+      {/* ══ Modal ═════════════════════════════════════════ */}
       {isModalOpen && (
-        <div className="modal-overlay">
-          <div className="card" style={{ width: '100%', maxWidth: '500px' }}>
-            <div className="modal-header">
+        <div className="drv-modal-overlay" onClick={() => setIsModalOpen(false)}>
+          <div className="drv-modal" onClick={e => e.stopPropagation()}>
+            <div className="drv-modal-header">
               <h3>{editingItem ? 'Cập nhật' : 'Thêm mới'} tài xế</h3>
-              <button onClick={() => setIsModalOpen(false)}><X size={20} /></button>
+              <button className="drv-modal-close" onClick={() => setIsModalOpen(false)}>
+                <X size={18} />
+              </button>
             </div>
             <form onSubmit={handleSubmit}>
               {!editingItem && (
-                <div className="input-group">
+                <div className="drv-form-field">
                   <label>Chọn người dùng</label>
                   <select 
-                    style={{ 
-                      width: '100%', 
-                      padding: '10px', 
-                      borderRadius: 'var(--radius-sm)', 
-                      border: '1px solid var(--border-color)',
-                      background: 'white',
-                      fontSize: '0.8125rem'
-                    }}
                     required
                     value={formData.userId}
                     onChange={e => setFormData({...formData, userId: e.target.value})}
                   >
                     <option value="">-- Chọn người dùng --</option>
                     {users.map(u => (
-                      <option key={u.id} value={u.id}>{u.fullName} ({u.email})</option>
+                      <option key={u.id} value={u.id}>{u.fullName || u.email}</option>
                     ))}
                   </select>
                 </div>
               )}
-              <div className="input-group">
+              
+              <div className="drv-form-field">
                 <label>Số bằng lái</label>
                 <input 
                   type="text" 
@@ -211,7 +291,8 @@ const Drivers = () => {
                   placeholder="VD: 123456789"
                 />
               </div>
-              <div className="input-group">
+              
+              <div className="drv-form-field">
                 <label>Số điện thoại</label>
                 <input 
                   type="text" 
@@ -223,17 +304,10 @@ const Drivers = () => {
                   placeholder="VD: 0912345678"
                 />
               </div>
-              <div className="input-group">
-                <label><Truck size={13} style={{ marginRight: '4px', verticalAlign: 'middle' }} />Gán xe</label>
+              
+              <div className="drv-form-field">
+                <label><Truck size={14} /> Gán xe</label>
                 <select 
-                  style={{ 
-                    width: '100%', 
-                    padding: '10px', 
-                    borderRadius: 'var(--radius-sm)', 
-                    border: '1px solid var(--border-color)',
-                    background: 'white',
-                    fontSize: '0.8125rem'
-                  }}
                   value={formData.vehicleId}
                   onChange={e => setFormData({...formData, vehicleId: e.target.value})}
                 >
@@ -248,10 +322,11 @@ const Drivers = () => {
                   })}
                 </select>
               </div>
-              <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-                <button type="button" className="btn-secondary" onClick={() => setIsModalOpen(false)}>Hủy</button>
-                <button type="submit" className="btn-primary">
-                  <Save size={18} /> Lưu thông tin
+              
+              <div className="drv-form-actions">
+                <button type="button" className="drv-form-cancel" onClick={() => setIsModalOpen(false)}>Hủy</button>
+                <button type="submit" className="drv-form-save">
+                  <Save size={15} /> Lưu thông tin
                 </button>
               </div>
             </form>

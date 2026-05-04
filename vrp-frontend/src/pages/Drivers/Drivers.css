@@ -1,0 +1,557 @@
+/* ═══════════════════════════════════════════════════
+   DRIVERS PAGE — Material 3 Data Table
+   ═══════════════════════════════════════════════════ */
+
+.drv-page {
+  padding: 24px;
+}
+
+/* ── Page Header ─────────────────────────────────── */
+.drv-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.drv-header-title h2 {
+  font-family: 'Manrope', sans-serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #0b1c30;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  margin: 0 0 6px;
+}
+
+.drv-header-title p {
+  font-size: 0.875rem;
+  color: #45464d;
+  margin: 0;
+}
+
+.drv-btn-add {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #0F172A;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background 0.15s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.drv-btn-add:hover {
+  background: #1e293b;
+}
+
+/* ── Toolbar / Filters ───────────────────────────── */
+.drv-toolbar {
+  background: white;
+  border: 1px solid #c6c6cd;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.drv-filter-pills {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.drv-pill {
+  padding: 6px 16px;
+  border-radius: 99px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: 1px solid;
+  background: transparent;
+  white-space: nowrap;
+}
+
+.drv-pill.all {
+  border-color: #131b2e;
+  color: #ffffff;
+  background: #131b2e;
+}
+
+.drv-pill.all:hover {
+  background: #213145;
+}
+
+.drv-pill.active-pill {
+  border-color: #c6c6cd;
+  color: #45464d;
+  background: #e5eeff;
+}
+
+.drv-pill.active-pill:hover, .drv-pill.active-pill.active {
+  background: #dce9ff;
+}
+
+.drv-pill.inactive-pill {
+  border-color: #c6c6cd;
+  color: #45464d;
+  background: #e5eeff;
+}
+
+.drv-pill.inactive-pill:hover, .drv-pill.inactive-pill.active {
+  background: #dce9ff;
+}
+
+.drv-search {
+  position: relative;
+  width: 320px;
+}
+
+.drv-search svg {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #76777d;
+  pointer-events: none;
+}
+
+.drv-search input {
+  width: 100%;
+  padding: 9px 14px 9px 38px;
+  border: 1px solid #c6c6cd;
+  border-radius: 8px;
+  background: #f8f9ff;
+  color: #0b1c30;
+  font-size: 0.875rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.drv-search input::placeholder {
+  color: #76777d;
+}
+
+.drv-search input:focus {
+  border-color: #0058be;
+  box-shadow: 0 0 0 3px rgba(0,88,190,0.1);
+}
+
+/* ── Data Table ──────────────────────────────────── */
+.drv-table-card {
+  background: white;
+  border: 1px solid #c6c6cd;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.drv-table {
+  width: 100%;
+  text-align: left;
+  border-collapse: collapse;
+}
+
+.drv-table thead tr {
+  background: #e5eeff;
+  border-bottom: 1px solid #c6c6cd;
+}
+
+.drv-table th {
+  padding: 12px 24px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #45464d;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.drv-table tbody tr {
+  border-bottom: 1px solid #c6c6cd;
+  transition: background 0.1s;
+}
+
+.drv-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.drv-table tbody tr:hover {
+  background: #eff4ff;
+}
+
+.drv-table td {
+  padding: 16px 24px;
+  font-size: 0.875rem;
+  color: #0b1c30;
+  vertical-align: middle;
+}
+
+/* Driver Identity Cell */
+.drv-identity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.drv-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid #c6c6cd;
+  object-fit: cover;
+}
+
+.drv-avatar-placeholder {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid #c6c6cd;
+  background: #d3e4fe;
+  color: #45464d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: 'Manrope', sans-serif;
+}
+
+.drv-name {
+  font-weight: 600;
+  color: #0b1c30;
+}
+
+.drv-id {
+  font-size: 0.75rem;
+  color: #45464d;
+  margin-top: 2px;
+}
+
+/* Status Badges */
+.drv-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 99px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: 'Inter', monospace;
+}
+
+.drv-status .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.drv-status.active {
+  background: #002113;
+  color: #009668;
+  border: 1px solid rgba(78, 222, 163, 0.3);
+}
+
+.drv-status.active .dot {
+  background: #4edea3;
+}
+
+.drv-status.inactive {
+  background: #d3e4fe;
+  color: #45464d;
+  border: 1px solid #c6c6cd;
+}
+
+.drv-status.inactive .dot {
+  background: #76777d;
+}
+
+/* Vehicle Assigned */
+.drv-vehicle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.drv-vehicle svg {
+  color: #76777d;
+}
+
+.drv-vehicle-plate {
+  display: inline-block;
+  padding: 4px 8px;
+  background: #d3e4fe;
+  border: 1px solid #c6c6cd;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  font-family: 'Inter', monospace;
+  color: #0b1c30;
+}
+
+.drv-vehicle-none {
+  font-style: italic;
+  font-size: 0.875rem;
+  color: #45464d;
+}
+
+/* Actions cell */
+.drv-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.drv-table tbody tr:hover .drv-actions {
+  opacity: 1;
+}
+
+.drv-action-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: #76777d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.drv-action-btn.edit:hover {
+  color: #0058be;
+  background: rgba(0, 88, 190, 0.1);
+}
+
+.drv-action-btn.delete:hover {
+  color: #ba1a1a;
+  background: rgba(186, 26, 26, 0.1);
+}
+
+/* ── Pagination ──────────────────────────────────── */
+.drv-pagination {
+  padding: 16px;
+  border-top: 1px solid #c6c6cd;
+  background: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+}
+
+.drv-pag-info {
+  font-size: 0.875rem;
+  color: #45464d;
+}
+
+.drv-pag-btns {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.drv-pag-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: #0b1c30;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.drv-pag-btn:hover {
+  background: #e5eeff;
+}
+
+.drv-pag-btn.active {
+  background: #0058be;
+  color: white;
+}
+
+.drv-pag-btn.nav {
+  color: #76777d;
+}
+
+.drv-pag-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Modal ───────────────────────────────────────── */
+.drv-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+
+.drv-modal {
+  background: white;
+  border: 1px solid #c6c6cd;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+  padding: 24px;
+}
+
+.drv-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.drv-modal-header h3 {
+  font-family: 'Manrope', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0b1c30;
+}
+
+.drv-modal-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: #45464d;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.drv-modal-close:hover {
+  background: #f1f5f9;
+}
+
+.drv-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+
+.drv-form-field label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #0b1c30;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.drv-form-field label svg {
+  color: #76777d;
+}
+
+.drv-form-field input,
+.drv-form-field select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #c6c6cd;
+  border-radius: 6px;
+  background: white;
+  color: #0b1c30;
+  font-size: 0.875rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.drv-form-field input:focus,
+.drv-form-field select:focus {
+  border-color: #0058be;
+  box-shadow: 0 0 0 3px rgba(0, 88, 190, 0.1);
+}
+
+.drv-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #e5eeff;
+}
+
+.drv-form-cancel {
+  padding: 10px 18px;
+  border: 1px solid #c6c6cd;
+  border-radius: 8px;
+  background: white;
+  color: #0b1c30;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.drv-form-cancel:hover {
+  background: #f1f5f9;
+}
+
+.drv-form-save {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  background: #0F172A;
+  color: white;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.drv-form-save:hover {
+  background: #1e293b;
+}
+
+/* ── Empty State ─────────────────────────────────── */
+.drv-empty {
+  padding: 48px 20px;
+  text-align: center;
+  color: #76777d;
+}
+
+.drv-empty p {
+  margin-top: 12px;
+  font-size: 0.875rem;
+}

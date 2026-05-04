@@ -21,6 +21,7 @@ public interface VrpSolver {
             Map<String, DistanceMatrix> distanceMap,
             AlgorithmConfig config,
             LocalDate routeDate,
-            LocalTime depotStartTime
+            LocalTime depotStartTime,
+            LocalTime depotEndTime  // Issue #15: null = không giới hạn
     );
 }

@@ -55,4 +55,17 @@ public class OptimizationResult {
 
     @Column(name = "error_message", columnDefinition = "TEXT")
     private String errorMessage;
+
+    // ═══════════════════════════════════════════════════════════════════
+    // ISSUE #11: CAPACITY UTILIZATION METRICS
+    // ═══════════════════════════════════════════════════════════════════
+
+    @Column(name = "avg_weight_utilization", precision = 5, scale = 2)
+    private BigDecimal avgWeightUtilization;
+
+    @Column(name = "avg_volume_utilization", precision = 5, scale = 2)
+    private BigDecimal avgVolumeUtilization;
+
+    @Column(name = "unassigned_orders")
+    private Integer unassignedOrders;
 }
